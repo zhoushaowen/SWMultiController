@@ -25,6 +25,25 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>
+            <point key="canvasLocation" x="1172" y="-30"/>
+        </scene>
+        <!--My Multi Controller-->
+        <scene sceneID="uCF-BT-ocd">
+            <objects>
+                <viewController storyboardIdentifier="multi" id="Shh-iu-yMS" customClass="MyMultiController" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="WWe-Ap-fnS"/>
+                        <viewControllerLayoutGuide type="bottom" id="oaL-7P-LRf"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="nse-8E-fYE">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                    </view>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="j5i-vA-PZh" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="684" y="32"/>
         </scene>
     </scenes>
 </document>

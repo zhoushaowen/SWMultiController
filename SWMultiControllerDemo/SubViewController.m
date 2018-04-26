@@ -28,7 +28,7 @@
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-    return 20;
+    return 30;
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
@@ -37,23 +37,27 @@
         cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"cell"];
         cell.backgroundColor = [UIColor clearColor];
     }
-    cell.textLabel.text = [NSString stringWithFormat:@"%ld",(long)indexPath.row];
+    if(indexPath.row % 2 == 0){
+        cell.textLabel.text = @"Present";
+    }else{
+        cell.textLabel.text = @"Dismiss";
+    }
     return cell;
 }
 
-- (void)didReceiveMemoryWarning {
-    [super didReceiveMemoryWarning];
-    // Dispose of any resources that can be recreated.
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
+    if(indexPath.row % 2 == 0){
+        UIStoryboard *storyboard = [UIStoryboard storyboardWithName:@"Main" bundle:nil];
+        UIViewController *vc = [storyboard instantiateViewControllerWithIdentifier:@"multi"];
+        [self presentViewController:vc animated:YES completion:nil];
+    }else{
+        if(self.presentingViewController){
+            [self dismissViewControllerAnimated:YES completion:nil];
+        }
+    }
+
+    [tableView deselectRowAtIndexPath:indexPath animated:YES];
 }
 
-/*
-#pragma mark - Navigation
-
-// In a storyboard-based application, you will often want to do a little preparation before navigation
-- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
-    // Get the new view controller using [segue destinationViewController].
-    // Pass the selected object to the new view controller.
-}
-*/
 
 @end

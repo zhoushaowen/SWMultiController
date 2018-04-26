@@ -17,6 +17,8 @@
 @property (nonatomic,copy) NSArray<UIViewController *> *subViewControllers;
 @property (nonatomic) NSInteger selectedIndex;
 @property (nonatomic) BOOL shouldIgnoreContentOffset;
+@property (nonatomic,weak) id orientationObserver;
+@property (nonatomic) UIDeviceOrientation currentOrientation;
 
 @end
 
@@ -58,6 +60,9 @@
         scroll.pagingEnabled = YES;
         scroll.delegate = self;
         scroll.autoresizingMask = UIViewAutoresizingFlexibleHeight|UIViewAutoresizingFlexibleWidth;
+        if(self.navigationController.interactivePopGestureRecognizer){
+            [scroll.panGestureRecognizer requireGestureRecognizerToFail:self.navigationController.interactivePopGestureRecognizer];
+        }
         [self.view addSubview:scroll];
         scroll;
     });
@@ -65,13 +70,20 @@
         UIView *view = [UIView new];
         view.frame = CGRectMake(0, 0, self.view.bounds.size.width, [self topTitleViewHeight]);
         view.autoresizingMask = UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleBottomMargin;
-        view.backgroundColor = [self topTitleViewBackgroundColor];
+        view.backgroundColor = [UIColor blackColor];
         [self.view addSubview:view];
         view;
     });
     self.topTitleScrollView = ({
         UIScrollView *scroll = [[UIScrollView alloc] initWithFrame:self.topTitleView.bounds];
+        if (@available(iOS 11.0, *)) {
+            scroll.contentInsetAdjustmentBehavior = UIScrollViewContentInsetAdjustmentNever;
+        } else {
+            // Fallback on earlier versions
+        }
         scroll.autoresizingMask = UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight;
+        scroll.showsVerticalScrollIndicator = NO;
+        scroll.showsHorizontalScrollIndicator = NO;
         [self.topTitleView addSubview:scroll];
         scroll;
     });
@@ -82,22 +94,58 @@
         view.backgroundColor = [self titleBottomViewColor];
         view.layer.cornerRadius = [self titleBottomViewCornerRadius];
         view.clipsToBounds = YES;
+        view.hidden = _hiddenTitleBottomView;
         view;
     });
     [self addTopTitleLabels];
     [self selectedIndex:0];
-    [[NSNotificationCenter defaultCenter] addObserverForName:UIDeviceOrientationDidChangeNotification object:nil queue:nil usingBlock:^(NSNotification * _Nonnull note) {
-        [self.scrollBgView setContentSize:CGSizeMake(self.view.bounds.size.width*self.subViewControllers.count, 0)];
-        [self.subViewControllers enumerateObjectsUsingBlock:^(UIViewController * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+//    [self addObserver];
+}
+
+- (void)addObserver {
+    self.currentOrientation = [UIDevice currentDevice].orientation;
+    __weak typeof(self) weakSelf = self;
+    _orientationObserver = [[NSNotificationCenter defaultCenter] addObserverForName:UIDeviceOrientationDidChangeNotification object:nil queue:nil usingBlock:^(NSNotification * _Nonnull note) {
+        __strong typeof(weakSelf) strongSelf = weakSelf;
+//        if(strongSelf.currentOrientation == UIDeviceOrientationUnknown) return;
+        if(strongSelf.currentOrientation == [UIDevice currentDevice].orientation) return;
+        strongSelf.currentOrientation = [UIDevice currentDevice].orientation;
+        if(!strongSelf.isViewLoaded) return;
+        [strongSelf.scrollBgView setContentSize:CGSizeMake(strongSelf.view.bounds.size.width*strongSelf.subViewControllers.count, 0)];
+        strongSelf.shouldIgnoreContentOffset = YES;
+        [strongSelf.scrollBgView setContentOffset:CGPointMake(strongSelf.scrollBgView.bounds.size.width*strongSelf.selectedIndex, 0) animated:NO];
+        [strongSelf.subViewControllers enumerateObjectsUsingBlock:^(UIViewController * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
             if(obj.parentViewController){
-                obj.view.frame = CGRectMake(self.scrollBgView.bounds.size.width * idx, 0, self.scrollBgView.bounds.size.width, self.scrollBgView.bounds.size.height);
+                obj.view.frame = CGRectMake(strongSelf.scrollBgView.bounds.size.width * idx, 0, strongSelf.scrollBgView.bounds.size.width, strongSelf.scrollBgView.bounds.size.height);
             }
         }];
-        UILabel *label = (UILabel *)[self.topTitleView viewWithTag:self.selectedIndex + 100];
-        [self setLabelToCenter:label];
-        self.shouldIgnoreContentOffset = YES;
-        [self.scrollBgView setContentOffset:CGPointMake(self.scrollBgView.bounds.size.width*self.selectedIndex, 0) animated:NO];
+        UILabel *label = (UILabel *)[strongSelf.topTitleView viewWithTag:strongSelf.selectedIndex + 100];
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+            [strongSelf setLabelToCenter:label];
+        });
+//        NSLog(@"%@",NSStringFromCGRect(strongSelf.scrollBgView.bounds));
     }];
+}
+
+- (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator {
+    [super viewWillTransitionToSize:size withTransitionCoordinator:coordinator];
+    NSLog(@"%@",NSStringFromCGSize(size));
+//    if(self.currentOrientation == [UIDevice currentDevice].orientation) return;
+//    self.currentOrientation = [UIDevice currentDevice].orientation;
+    if(!self.isViewLoaded) return;
+    [self.scrollBgView setContentSize:CGSizeMake(size.width*self.subViewControllers.count, 0)];
+    self.shouldIgnoreContentOffset = YES;
+    [self.scrollBgView setContentOffset:CGPointMake(size.width*self.selectedIndex, 0) animated:NO];
+    [self.subViewControllers enumerateObjectsUsingBlock:^(UIViewController * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        if(obj.parentViewController){
+            obj.view.frame = CGRectMake(size.width * idx, 0, size.width, size.height - [self topTitleViewHeight]);
+        }
+    }];
+    UILabel *label = (UILabel *)[self.topTitleView viewWithTag:self.selectedIndex + 100];
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        [self setLabelToCenter:label];
+    });
+
 }
 
 - (void)addTopTitleLabels {
@@ -114,11 +162,16 @@
         label.textColor = [self normalColorOfTitleLabel];
         label.font = [self normalFontOfTitleLabel];
         [self.topTitleScrollView addSubview:label];
-        label.text = obj.title;
+        NSMutableAttributedString *attributedStr = [[NSMutableAttributedString alloc] initWithString:obj.title];
+        [attributedStr addAttribute:NSBaselineOffsetAttributeName value:@([self titleLabelBaselineOffset]) range:NSMakeRange(0, attributedStr.length)];
         if(idx == 0){
-            label.font = [self selectedFontOfTitleLabel];
-            label.textColor = [self selectedColorOfTitleLabel];
+            [attributedStr addAttribute:NSFontAttributeName value:[self selectedFontOfTitleLabel] range:NSMakeRange(0, attributedStr.length)];
+            [attributedStr addAttribute:NSForegroundColorAttributeName value:[self selectedColorOfTitleLabel] range:NSMakeRange(0, attributedStr.length)];
+        }else{
+            [attributedStr addAttribute:NSFontAttributeName value:[self normalFontOfTitleLabel] range:NSMakeRange(0, attributedStr.length)];
+            [attributedStr addAttribute:NSForegroundColorAttributeName value:[self normalColorOfTitleLabel] range:NSMakeRange(0, attributedStr.length)];
         }
+        label.attributedText = attributedStr;
         CGSize size = [label sizeThatFits:CGSizeMake(MAXFLOAT, [self topTitleViewHeight])];
         label.frame = CGRectMake(totalWidth, 0, size.width, [self topTitleViewHeight]);
         totalWidth += size.width + [self horizontalSpaceOfTitleLabel];
@@ -128,10 +181,6 @@
     self.titleBottomView.bounds = CGRectMake(0, 0, rect.size.width, [self titleBottomViewHeight]);
     self.titleBottomView.center = CGPointMake(CGRectGetMidX(rect), [self topTitleViewHeight] - [self verticalSpaceBetweenBottom]);
     self.scrollBgView.contentSize = CGSizeMake(self.view.bounds.size.width*self.subViewControllers.count, 0);
-}
-
-- (void)viewWillLayoutSubviews {
-    [super viewWillLayoutSubviews];
 }
 
 - (void)addSubViewContollerViewIfNeeded:(NSInteger)index {
@@ -150,10 +199,6 @@
 #pragma mark - Override
 - (CGFloat)topTitleViewHeight {
     return 60;
-}
-
-- (UIColor *)topTitleViewBackgroundColor {
-    return [UIColor blackColor];
 }
 
 - (UIColor *)titleBottomViewColor {
@@ -192,9 +237,13 @@
     return [UIFont systemFontOfSize:15];
 }
 
+- (CGFloat)titleLabelBaselineOffset {
+    return 0;
+}
+
 #pragma mark - UIGestureRecognizerDelegate
 - (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldReceiveTouch:(UITouch *)touch {
-    if([touch.view class] != [UILabel class]) return NO;
+    if(![touch.view isKindOfClass:[UILabel class]]) return NO;
     return YES;
 }
 
@@ -261,6 +310,7 @@
 }
 
 - (void)changeTitleBottomViewWithCurrentIndex:(NSInteger)currentIndex percent:(CGFloat)percent currentLabel:(UILabel *)currentLabel nextLabel:(UILabel *)nextLabel {
+    if(_hiddenTitleBottomView) return;
     CGFloat nextLabelWidth = [nextLabel.text boundingRectWithSize:CGSizeMake(MAXFLOAT, [self topTitleViewHeight]) options:NSStringDrawingUsesLineFragmentOrigin attributes:@{NSFontAttributeName:[self selectedFontOfTitleLabel]} context:nil].size.width;
     CGFloat currentLabelWidth = [currentLabel.text boundingRectWithSize:CGSizeMake(MAXFLOAT, [self topTitleViewHeight]) options:NSStringDrawingUsesLineFragmentOrigin attributes:@{NSFontAttributeName:[self selectedFontOfTitleLabel]} context:nil].size.width;
     CGFloat widthOffset = nextLabelWidth - currentLabelWidth;
@@ -373,6 +423,18 @@
     self.selectedIndex = -1;
     [self addTopTitleLabels];
     [self selectedIndex:0];
+}
+
+- (void)setHiddenTitleBottomView:(BOOL)hiddenTitleBottomView {
+    _hiddenTitleBottomView = hiddenTitleBottomView;
+    self.titleBottomView.hidden = _hiddenTitleBottomView;
+}
+
+- (void)dealloc {
+    if(self.isViewLoaded && _orientationObserver){
+        [[NSNotificationCenter defaultCenter] removeObserver:_orientationObserver];
+    }
+    NSLog(@"%s",__func__);
 }
 
 

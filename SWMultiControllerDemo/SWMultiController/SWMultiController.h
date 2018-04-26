@@ -34,6 +34,15 @@
  最底层的scrollView
  */
 @property (nonatomic,readonly,strong) UIScrollView *scrollBgView;
+/**
+ 顶部滑动视图的背景视图
+ */
+@property (nonatomic,readonly,strong) UIView *topTitleView;
+
+/**
+ 是否隐藏标题下方的横线,默认NO
+ */
+@property (nonatomic) BOOL hiddenTitleBottomView;
 
 /**
  手动选择某个索引
@@ -57,17 +66,11 @@
 - (CGFloat)topTitleViewHeight;
 
 /**
- 顶部标题视图的背景色
- 可以重写此方法,进行自定义
- */
-- (UIColor *)topTitleViewBackgroundColor;
-
-/**
  标题之间的水平间距
  可以重写此方法,进行自定义
  */
-- (CGFloat)horizontalSpaceOfTitleLabel;
 
+- (CGFloat)horizontalSpaceOfTitleLabel;
 /**
  选中标题的文字颜色
  可以重写此方法,进行自定义
@@ -92,5 +95,34 @@
  */
 - (UIFont *)normalFontOfTitleLabel;
 
+/**
+ 底部横线视图的距离底部的距离
+ 可以重写此方法,进行自定义
+ */
+- (CGFloat)verticalSpaceBetweenBottom;
+
+/**
+ 底部横线视图的圆角半径
+ 可以重写此方法,进行自定义
+ */
+- (CGFloat)titleBottomViewCornerRadius;
+
+/**
+ 底部横线视图的高度
+ 可以重写此方法,进行自定义
+ */
+- (CGFloat)titleBottomViewHeight;
+
+/**
+ 底部横线视图的颜色
+ 可以重写此方法,进行自定义
+ */
+- (UIColor *)titleBottomViewColor;
+
+/**
+ 底部横线视图的距离Baseline偏移量
+ 可以重写此方法,进行自定义
+ */
+- (CGFloat)titleLabelBaselineOffset;
 
 @end
