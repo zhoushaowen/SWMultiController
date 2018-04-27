@@ -4,4 +4,5 @@
 #### pod 'SWMultiController'
 
 ![](https://github.com/zhoushaowen/SWMultiController/blob/master/screenshot/1.gif?raw=true)
+
 截图
