@@ -10,9 +10,9 @@
 
 @interface SWMultiController ()
 
-@property (nonatomic,strong) UIView *topTitleView;
-@property (nonatomic,strong) UIScrollView *scrollBgView;
-@property (nonatomic,strong) UIScrollView *topTitleScrollView;
+@property (nonatomic) UIView *topTitleView;
+@property (nonatomic) UIScrollView *scrollBgView;
+@property (nonatomic) UIScrollView *topTitleScrollView;
 @property (nonatomic) UIView *titleBottomView;
 @property (nonatomic,copy) NSArray<UIViewController *> *subViewControllers;
 @property (nonatomic) NSInteger selectedIndex;
@@ -142,6 +142,8 @@
     __block CGFloat totalWidth = [self horizontalSpaceOfTitleLabel];
     [self.subViewControllers enumerateObjectsUsingBlock:^(__kindof UIViewController * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
         UILabel *label = [UILabel new];
+        label.numberOfLines = 0;
+        label.textAlignment = [self titleLabelTextAlignment];
         label.userInteractionEnabled = YES;
         UITapGestureRecognizer *tapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTapGesture:)];
         tapGesture.delegate = self;
@@ -225,6 +227,10 @@
     return [UIFont systemFontOfSize:15];
 }
 
+- (NSTextAlignment)titleLabelTextAlignment {
+    return NSTextAlignmentCenter;
+}
+
 - (CGFloat)titleLabelBaselineOffset {
     return 0;
 }
@@ -241,13 +247,22 @@
         _shouldIgnoreContentOffset = NO;
         return;
     }
-    if(scrollView.contentOffset.x < 0) return;
-    NSInteger currentIndex = scrollView.contentOffset.x/scrollView.bounds.size.width;
-//    self.selectedIndex = currentIndex;
+    CGPoint contentOffset = scrollView.contentOffset;
+    if(contentOffset.x < 0) {
+        contentOffset.x = 0;
+    }
+    NSInteger currentIndex = contentOffset.x/scrollView.bounds.size.width;
     UILabel *currentLabel = [self.topTitleScrollView viewWithTag:currentIndex + 100];
     UILabel *nextLabel = [self.topTitleScrollView viewWithTag:currentIndex + 100 + 1];
-    if(!nextLabel) return;
-    CGFloat percent = (scrollView.contentOffset.x - scrollView.bounds.size.width*currentIndex)/scrollView.bounds.size.width;
+    if(!nextLabel){
+        currentLabel.font = [self getFontWithBeginFont:[self selectedFontOfTitleLabel] endFont:[self normalFontOfTitleLabel] percent:0.0];
+        currentLabel.textColor = [self getColorWithBeginColor:[self selectedColorOfTitleLabel] endColor:[self normalColorOfTitleLabel] percent:0.0];
+        [self updateTopTitleScrollViewContentSize];
+        [self changeTitleBottomViewWithCurrentIndex:currentIndex percent:0.0 currentLabel:currentLabel nextLabel:nextLabel];
+        [self setLabelToCenter:currentLabel animated:YES];
+        return;
+    }
+    CGFloat percent = (contentOffset.x - scrollView.bounds.size.width*currentIndex)/scrollView.bounds.size.width;
     currentLabel.font = [self getFontWithBeginFont:[self selectedFontOfTitleLabel] endFont:[self normalFontOfTitleLabel] percent:percent];
     nextLabel.font = [self getFontWithBeginFont:[self normalFontOfTitleLabel] endFont:[self selectedFontOfTitleLabel] percent:percent];
     currentLabel.textColor = [self getColorWithBeginColor:[self selectedColorOfTitleLabel] endColor:[self normalColorOfTitleLabel] percent:percent];
@@ -284,8 +299,6 @@
     NSInteger index = scrollView.contentOffset.x/scrollView.bounds.size.width;
     self.selectedIndex = index;
     [self addSubViewContollerViewIfNeeded:index];
-    UILabel *label = [self.topTitleScrollView viewWithTag:index + 100];
-    [self setLabelToCenter:label animated:YES];
     if(_willDisplayControllerBlock){
         _willDisplayControllerBlock(self.subViewControllers[index],index);
     }
@@ -324,17 +337,17 @@
 
 - (void)changeTitleBottomViewWithCurrentIndex:(NSInteger)currentIndex percent:(CGFloat)percent currentLabel:(UILabel *)currentLabel nextLabel:(UILabel *)nextLabel {
     if(_hiddenTitleBottomView) return;
-    CGFloat nextLabelWidth = [nextLabel.text boundingRectWithSize:CGSizeMake(MAXFLOAT, [self topTitleViewHeight]) options:NSStringDrawingUsesLineFragmentOrigin attributes:@{NSFontAttributeName:[self selectedFontOfTitleLabel]} context:nil].size.width;
-    CGFloat currentLabelWidth = [currentLabel.text boundingRectWithSize:CGSizeMake(MAXFLOAT, [self topTitleViewHeight]) options:NSStringDrawingUsesLineFragmentOrigin attributes:@{NSFontAttributeName:[self selectedFontOfTitleLabel]} context:nil].size.width;
+    CGFloat nextLabelWidth = [nextLabel sizeThatFits:CGSizeMake(MAXFLOAT, [self topTitleViewHeight])].width;
+    CGFloat currentLabelWidth = [currentLabel sizeThatFits:CGSizeMake(MAXFLOAT, [self topTitleViewHeight])].width;
     CGFloat widthOffset = nextLabelWidth - currentLabelWidth;
     CGFloat nextLabelCenterX = 0;
     for(int i=0;i<currentIndex + 2;i++){
         UILabel *label = [self.topTitleScrollView viewWithTag:i + 100];
         CGFloat width = 0;
         if(i == (currentIndex + 1)){//如果是最后一个label,只需计算出label长度的一半
-            width = [label.text boundingRectWithSize:CGSizeMake(MAXFLOAT, [self topTitleViewHeight]) options:NSStringDrawingUsesLineFragmentOrigin attributes:@{NSFontAttributeName:[self selectedFontOfTitleLabel]} context:nil].size.width/2.0f;
+            width = [label sizeThatFits:CGSizeMake(MAXFLOAT, [self topTitleViewHeight])].width/2.0f;
         }else{
-            width = [label.text boundingRectWithSize:CGSizeMake(MAXFLOAT, [self topTitleViewHeight]) options:NSStringDrawingUsesLineFragmentOrigin attributes:@{NSFontAttributeName:[self normalFontOfTitleLabel]} context:nil].size.width;
+            width = [label sizeThatFits:CGSizeMake(MAXFLOAT, [self topTitleViewHeight])].width;
         }
         nextLabelCenterX += width + [self horizontalSpaceOfTitleLabel];
     }

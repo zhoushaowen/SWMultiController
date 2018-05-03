@@ -22,9 +22,9 @@
     for (int i=0; i<10; i++) {
         SubViewController *subVC = [SubViewController new];
         if(i%2 == 0){
-            subVC.title = [NSString stringWithFormat:@"短标题%d",i];
+            subVC.title = [NSString stringWithFormat:@"短标题\n我是index%d",i];
         }else{
-            subVC.title = [NSString stringWithFormat:@"测试长标题:%d",i];
+            subVC.title = [NSString stringWithFormat:@"测试长标题\n我是index:%d",i];
         }
         [mutableArr addObject:subVC];
     }
@@ -61,7 +61,7 @@
 }
 
 - (CGFloat)topTitleViewHeight {
-    return 50;
+    return 80;
 }
 
 - (CGFloat)titleBottomViewHeight {

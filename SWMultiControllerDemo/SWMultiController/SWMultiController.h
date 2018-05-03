@@ -96,6 +96,12 @@
 - (UIFont *)normalFontOfTitleLabel;
 
 /**
+ 标题的对其方式,默认是NSTextAlignmentCenter
+ 可以重写此方法,进行自定义
+ */
+- (NSTextAlignment)titleLabelTextAlignment;
+
+/**
  底部横线视图的距离底部的距离
  可以重写此方法,进行自定义
  */
@@ -124,5 +130,8 @@
  可以重写此方法,进行自定义
  */
 - (CGFloat)titleLabelBaselineOffset;
+
+
+
 
 @end
