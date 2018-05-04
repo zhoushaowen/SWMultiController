@@ -12,7 +12,7 @@
 
 @interface UIViewController (SWMultiController)
 
-@property (nullable,nonatomic,readonly,weak) SWMultiController *multiController;
+@property (nullable,nonatomic,readonly,weak) __kindof SWMultiController *multiController;
 
 @end
 

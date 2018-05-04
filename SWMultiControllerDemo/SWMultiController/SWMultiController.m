@@ -208,7 +208,7 @@
                 label.font = [self normalFontOfTitleLabel];
             }
         }];
-        UILabel *label = (UILabel *)[self.topTitleView viewWithTag:self.selectedIndex + 100];
+        UILabel *label = [self.topTitleView viewWithTag:self.selectedIndex + 100];
         label.textColor = [self selectedColorOfTitleLabel];
         label.font = [self selectedFontOfTitleLabel];
         [self updateTopTitleScrollViewContentSize];
@@ -519,8 +519,8 @@
     }
     _shouldIgnoreContentOffset = YES;
     [self.scrollBgView setContentOffset:CGPointMake(self.scrollBgView.bounds.size.width * index, 0) animated:NO];
-    UILabel *currentLabel = (UILabel *)[self.topTitleScrollView viewWithTag:self.selectedIndex + 100];
-    UILabel *nextLabel = (UILabel *)[self.topTitleScrollView viewWithTag:index + 100];
+    UILabel *currentLabel = [self.topTitleScrollView viewWithTag:self.selectedIndex + 100];
+    UILabel *nextLabel = [self.topTitleScrollView viewWithTag:index + 100];
     currentLabel.font = [self getFontWithBeginFont:[self selectedFontOfTitleLabel] endFont:[self normalFontOfTitleLabel] percent:1.0f];
     nextLabel.font = [self getFontWithBeginFont:[self normalFontOfTitleLabel] endFont:[self selectedFontOfTitleLabel] percent:1.0f];
     currentLabel.textColor = [self getColorWithBeginColor:[self selectedColorOfTitleLabel] endColor:[self normalColorOfTitleLabel] percent:1.0f];
