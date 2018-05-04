@@ -30,11 +30,11 @@
     }
     SWMultiController *vc = [[SWMultiController alloc] initWithSubControllers:mutableArr];
     [self addChildViewController:vc];
-    [vc didMoveToParentViewController:self];
     vc.view.frame = self.view.bounds;
     vc.view.autoresizingMask = UIViewAutoresizingFlexibleHeight|UIViewAutoresizingFlexibleWidth;
     [self.view addSubview:vc.view];
-    [vc selectedIndex:3];
+    [vc didMoveToParentViewController:self];
+    [vc selectedIndex:1];
     
 //    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(3 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
 //        NSMutableArray *mutableArr = [NSMutableArray arrayWithCapacity:0];

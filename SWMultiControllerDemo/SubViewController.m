@@ -7,6 +7,7 @@
 //
 
 #import "SubViewController.h"
+#import "SWMultiController.h"
 
 @interface SubViewController ()<UITableViewDelegate,UITableViewDataSource>
 {
@@ -25,6 +26,26 @@
     _tableView.dataSource = self;
     _tableView.backgroundColor = [UIColor colorWithRed:arc4random_uniform(256)/255.0f green:arc4random_uniform(256)/255.0f blue:arc4random_uniform(256)/255.0f alpha:1.0];
     [self.view addSubview:_tableView];
+}
+
+- (void)viewWillAppear:(BOOL)animated {
+    [super viewWillAppear:animated];
+    NSLog(@"%s---index:%ld",__func__,[self.multiController indexOfSubController:self]);
+}
+
+- (void)viewDidAppear:(BOOL)animated {
+    [super viewDidAppear:animated];
+    NSLog(@"%s---index:%ld",__func__,[self.multiController indexOfSubController:self]);
+}
+
+- (void)viewWillDisappear:(BOOL)animated {
+    [super viewWillDisappear:animated];
+    NSLog(@"%s---index:%ld",__func__,[self.multiController indexOfSubController:self]);
+}
+
+- (void)viewDidDisappear:(BOOL)animated {
+    [super viewDidDisappear:animated];
+    NSLog(@"%s---index:%ld",__func__,[self.multiController indexOfSubController:self]);
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {

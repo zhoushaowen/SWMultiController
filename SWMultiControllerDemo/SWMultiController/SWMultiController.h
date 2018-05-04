@@ -8,6 +8,14 @@
 
 #import <UIKit/UIKit.h>
 
+@class SWMultiController;
+
+@interface UIViewController (SWMultiController)
+
+@property (nullable,nonatomic,readonly,weak) SWMultiController *multiController;
+
+@end
+
 @interface SWMultiController : UIViewController<UIScrollViewDelegate,UIGestureRecognizerDelegate>
 
 /**
@@ -26,9 +34,14 @@
  */
 - (void)reloadWithSubViewControllers:(NSArray<UIViewController *> *)subViewControllers;
 /**
- 即将显示某个控制器的回调
+ 选中了某个控制器的回调
  */
-@property (nonatomic,strong) void(^willDisplayControllerBlock)(UIViewController *visibleController,NSInteger index);
+@property (nonatomic,strong) void(^didSelectedControllerBlock)(UIViewController *selectedController,NSInteger index);
+
+/**
+ 已经不选中某个控制器的回调
+ */
+@property (nonatomic,strong) void(^didUnSelectedControllerBlock)(UIViewController *unSelectedController,NSInteger index);
 
 /**
  最底层的scrollView

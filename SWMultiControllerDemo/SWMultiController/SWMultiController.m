@@ -8,6 +8,10 @@
 
 #import "SWMultiController.h"
 
+@interface SWMultiControllerObserver : NSObject
+
+@end
+
 @interface SWMultiController ()
 
 @property (nonatomic) UIView *topTitleView;
@@ -17,6 +21,51 @@
 @property (nonatomic,copy) NSArray<UIViewController *> *subViewControllers;
 @property (nonatomic) NSInteger selectedIndex;
 @property (nonatomic) BOOL shouldIgnoreContentOffset;
+@property (nonatomic) BOOL sw_isViewDidAppeared;
+@property (nonatomic) SWMultiControllerObserver *observer;
+
+@end
+
+@implementation UIViewController (SWMultiController)
+
+- (SWMultiController *)multiController {
+    if(self.parentViewController == nil || ![self.parentViewController isKindOfClass:[SWMultiController class]]) return nil;
+    return (SWMultiController *)self.parentViewController;
+}
+
+
+@end
+
+@implementation SWMultiControllerObserver
+
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSKeyValueChangeKey,id> *)change context:(void *)context {
+    NSInteger oldIndex = [change[NSKeyValueChangeOldKey] integerValue];
+    NSInteger currentIndex = [change[NSKeyValueChangeNewKey] integerValue];
+//    NSLog(@"oldIndex:%ld-----currentIndex:%ld",(long)oldIndex,(long)currentIndex);
+    SWMultiController *multiController = (SWMultiController *)object;
+    if(oldIndex != - 1){
+        UIViewController *oldVC = multiController.subViewControllers[oldIndex];
+        if(!oldVC) return;
+        if(multiController.sw_isViewDidAppeared){
+            [oldVC beginAppearanceTransition:NO animated:YES];
+            [oldVC endAppearanceTransition];
+        }
+        if(multiController.didUnSelectedControllerBlock){
+            multiController.didUnSelectedControllerBlock(oldVC, oldIndex);
+        }
+    }
+    if(currentIndex != -1){
+        UIViewController *currentVC = multiController.subViewControllers[currentIndex];
+        if(!currentVC) return;
+        if(multiController.sw_isViewDidAppeared){
+            [currentVC beginAppearanceTransition:YES animated:YES];
+            [currentVC endAppearanceTransition];
+        }
+        if(multiController.didSelectedControllerBlock){
+            multiController.didSelectedControllerBlock(currentVC, currentIndex);
+        }
+    }
+}
 
 @end
 
@@ -27,6 +76,7 @@
     if(self){
         self.selectedIndex = - 1;
         self.subViewControllers = subControllers;
+        [self addObserver];
     }
     return self;
 }
@@ -39,6 +89,7 @@
     self = [super initWithCoder:aDecoder];
     if(self){
         self.selectedIndex = - 1;
+        [self addObserver];
     }
     return self;
 }
@@ -97,6 +148,43 @@
     });
     [self addTopTitleLabels];
     [self selectedIndex:0];
+}
+
+- (BOOL)shouldAutomaticallyForwardAppearanceMethods {
+    return NO;
+}
+
+- (void)viewWillAppear:(BOOL)animated {
+    [super viewWillAppear:animated];
+//    NSLog(@"%s",__func__);
+    [self.childViewControllers enumerateObjectsUsingBlock:^(__kindof UIViewController * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        [obj beginAppearanceTransition:YES animated:animated];
+    }];
+}
+
+- (void)viewDidAppear:(BOOL)animated {
+    [super viewDidAppear:animated];
+//    NSLog(@"%s",__func__);
+    self.sw_isViewDidAppeared = YES;
+    [self.childViewControllers enumerateObjectsUsingBlock:^(__kindof UIViewController * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        [obj endAppearanceTransition];
+    }];
+}
+
+- (void)viewWillDisappear:(BOOL)animated {
+    [super viewWillDisappear:animated];
+//    NSLog(@"%s",__func__);
+    [self.childViewControllers enumerateObjectsUsingBlock:^(__kindof UIViewController * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        [obj beginAppearanceTransition:NO animated:animated];
+    }];
+}
+
+- (void)viewDidDisappear:(BOOL)animated {
+    [super viewDidDisappear:animated];
+//    NSLog(@"%s",__func__);
+    [self.childViewControllers enumerateObjectsUsingBlock:^(__kindof UIViewController * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        [obj endAppearanceTransition];
+    }];
 }
 
 - (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator {
@@ -178,9 +266,9 @@
     if(subVC == nil) return;
     if(subVC.parentViewController == nil){
         [self addChildViewController:subVC];
-        [subVC didMoveToParentViewController:self];
-        [self.scrollBgView addSubview:subVC.view];
         subVC.view.frame = CGRectMake(self.scrollBgView.bounds.size.width*index, 0, self.scrollBgView.bounds.size.width, self.scrollBgView.bounds.size.height);
+        [self.scrollBgView addSubview:subVC.view];
+        [subVC didMoveToParentViewController:self];
     }else{
         subVC.view.frame = CGRectMake(self.scrollBgView.bounds.size.width*index, 0, self.scrollBgView.bounds.size.width, self.scrollBgView.bounds.size.height);
     }
@@ -251,17 +339,12 @@
     if(contentOffset.x < 0) {
         contentOffset.x = 0;
     }
+    if(contentOffset.x > scrollView.bounds.size.width * (self.subViewControllers.count - 1)){
+        contentOffset.x = scrollView.bounds.size.width * (self.subViewControllers.count - 1);
+    }
     NSInteger currentIndex = contentOffset.x/scrollView.bounds.size.width;
     UILabel *currentLabel = [self.topTitleScrollView viewWithTag:currentIndex + 100];
     UILabel *nextLabel = [self.topTitleScrollView viewWithTag:currentIndex + 100 + 1];
-    if(!nextLabel){
-        currentLabel.font = [self getFontWithBeginFont:[self selectedFontOfTitleLabel] endFont:[self normalFontOfTitleLabel] percent:0.0];
-        currentLabel.textColor = [self getColorWithBeginColor:[self selectedColorOfTitleLabel] endColor:[self normalColorOfTitleLabel] percent:0.0];
-        [self updateTopTitleScrollViewContentSize];
-        [self changeTitleBottomViewWithCurrentIndex:currentIndex percent:0.0 currentLabel:currentLabel nextLabel:nextLabel];
-        [self setLabelToCenter:currentLabel animated:YES];
-        return;
-    }
     CGFloat percent = (contentOffset.x - scrollView.bounds.size.width*currentIndex)/scrollView.bounds.size.width;
     currentLabel.font = [self getFontWithBeginFont:[self selectedFontOfTitleLabel] endFont:[self normalFontOfTitleLabel] percent:percent];
     nextLabel.font = [self getFontWithBeginFont:[self normalFontOfTitleLabel] endFont:[self selectedFontOfTitleLabel] percent:percent];
@@ -269,6 +352,29 @@
     nextLabel.textColor = [self getColorWithBeginColor:[self normalColorOfTitleLabel] endColor:[self selectedColorOfTitleLabel] percent:percent];
     [self updateTopTitleScrollViewContentSize];
     [self changeTitleBottomViewWithCurrentIndex:currentIndex percent:percent currentLabel:currentLabel nextLabel:nextLabel];
+    if(contentOffset.x > (self.subViewControllers.count - 2) * scrollView.bounds.size.width ){//当前快滑动到最后一个index的时候,先更新topTitleScrollView的contentSize
+        CGFloat totalWidth = [self horizontalSpaceOfTitleLabel];
+        for (int i=0; i<self.subViewControllers.count; i++) {
+            UILabel *label = [self.topTitleScrollView viewWithTag:i+100];
+            CGFloat width = 0;
+            UILabel *tmpLabel = [UILabel new];
+            tmpLabel.numberOfLines = 0;
+            tmpLabel.textAlignment = [self titleLabelTextAlignment];
+            tmpLabel.text = label.text;
+            tmpLabel.attributedText = label.attributedText;
+            if(i < self.subViewControllers.count - 1){
+                tmpLabel.font = [self normalFontOfTitleLabel];
+            }else{
+                tmpLabel.font = [self selectedFontOfTitleLabel];
+            }
+            width = [tmpLabel sizeThatFits:CGSizeMake(MAXFLOAT, [self topTitleViewHeight])].width;
+            totalWidth += width + [self horizontalSpaceOfTitleLabel];
+        }
+        if(totalWidth < self.topTitleScrollView.bounds.size.width){
+            totalWidth = self.topTitleScrollView.bounds.size.width;
+        }
+        self.topTitleScrollView.contentSize = CGSizeMake(totalWidth, 0);
+    }
 }
 
 - (void)scrollViewWillEndDragging:(UIScrollView *)scrollView withVelocity:(CGPoint)velocity targetContentOffset:(inout CGPoint *)targetContentOffset {
@@ -276,7 +382,6 @@
     NSInteger index = (*targetContentOffset).x/scrollView.bounds.size.width;
 //    NSLog(@"%ld",(long)index);
     if(index < 0 || index > self.subViewControllers.count - 1) return;
-    self.selectedIndex = index;
     UILabel *label = [self.topTitleScrollView viewWithTag:index + 100];
     [self setLabelToCenter:label animated:YES];
 }
@@ -287,21 +392,15 @@
 //    NSLog(@"%ld",(long)index);
     if(index < 0 || index > self.subViewControllers.count - 1) return;
     if(!decelerate){
-        self.selectedIndex = index;
         [self addSubViewContollerViewIfNeeded:index];
-        if(_willDisplayControllerBlock){
-            _willDisplayControllerBlock(self.subViewControllers[index],index);
-        }
+        self.selectedIndex = index;
     }
 }
 
 - (void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView {
     NSInteger index = scrollView.contentOffset.x/scrollView.bounds.size.width;
-    self.selectedIndex = index;
     [self addSubViewContollerViewIfNeeded:index];
-    if(_willDisplayControllerBlock){
-        _willDisplayControllerBlock(self.subViewControllers[index],index);
-    }
+    self.selectedIndex = index;
 }
 
 #pragma mark - Private
@@ -368,6 +467,9 @@
         label.frame = CGRectMake(totalWidth, 0, size.width, [self topTitleViewHeight]);
         totalWidth += size.width + [self horizontalSpaceOfTitleLabel];
     }
+    if(totalWidth < self.topTitleScrollView.bounds.size.width){
+        totalWidth = self.topTitleScrollView.bounds.size.width;
+    }
     self.topTitleScrollView.contentSize = CGSizeMake(totalWidth, 0);
 }
 
@@ -393,10 +495,28 @@
     [self selectedIndex:index];
 }
 
+- (void)addObserver {
+    [self addObserver:self.observer forKeyPath:@"selectedIndex" options:NSKeyValueObservingOptionNew|NSKeyValueObservingOptionOld context:nil];
+}
+
+- (void)removeObserver {
+    [self removeObserver:self.observer forKeyPath:@"selectedIndex"];
+}
+
+- (SWMultiControllerObserver *)observer {
+    if(!_observer){
+        _observer = [SWMultiControllerObserver new];
+    }
+    return _observer;
+}
+
 #pragma mark - Public
 - (void)selectedIndex:(NSInteger)index {
     if(index == self.selectedIndex) return;
-    if(!self.isViewLoaded) return;
+    if(!self.isViewLoaded){
+        NSLog(@"SWMultiController还没loadView,selectedIndex被忽略");
+        return;
+    }
     _shouldIgnoreContentOffset = YES;
     [self.scrollBgView setContentOffset:CGPointMake(self.scrollBgView.bounds.size.width * index, 0) animated:NO];
     UILabel *currentLabel = (UILabel *)[self.topTitleScrollView viewWithTag:self.selectedIndex + 100];
@@ -413,12 +533,9 @@
     center.x = CGRectGetMidX(nextLabel.frame);
     self.titleBottomView.bounds = bounds;
     self.titleBottomView.center = center;
-    self.selectedIndex = index;
     [self addSubViewContollerViewIfNeeded:index];
     [self setLabelToCenter:nextLabel animated:YES];
-    if(_willDisplayControllerBlock){
-        _willDisplayControllerBlock(self.subViewControllers[index], index);
-    }
+    self.selectedIndex = index;
 }
 
 - (NSInteger)indexOfSubController:(UIViewController *)subController {
@@ -426,6 +543,7 @@
 }
 
 - (void)reloadWithSubViewControllers:(NSArray<UIViewController *> *)subViewControllers {
+    self.selectedIndex = -1;
     [self.subViewControllers enumerateObjectsUsingBlock:^(UIViewController * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
         if(obj.parentViewController){
             [obj.view removeFromSuperview];
@@ -446,7 +564,6 @@
             }
         }];
     }
-    self.selectedIndex = -1;
     [self addTopTitleLabels];
     [self selectedIndex:0];
 }
@@ -458,6 +575,7 @@
 
 - (void)dealloc {
     NSLog(@"%s",__func__);
+    [self removeObserver];
 }
 
 
