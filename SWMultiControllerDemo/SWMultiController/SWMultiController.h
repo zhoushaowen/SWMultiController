@@ -73,6 +73,18 @@
 - (NSInteger)indexOfSubController:(UIViewController *)subController;
 
 #pragma mark - Override
+
+/**
+ 是否允许动态改变标题底部横线视图的宽度,默认是YES;
+ 如果不想随着scrollView的滑动动态改变,那么需要重写此方法返回NO,并且实现titleBottomViewWidth方法,返回一个固定的高度;
+ */
+- (BOOL)shouldDynamicChangeTitleBottomViewWidth;
+
+/**
+ 标题底部横线视图的宽度;
+ 如果shouldDynamicChangeTitleBottomViewWidth方法返回值是YES,那么重写本方法没有任何作用;
+ */
+- (CGFloat)titleBottomViewWidth;
 /**
  顶部标题视图的高度
  可以重写此方法,进行自定义

@@ -52,6 +52,14 @@
     NSLog(@"%s",__func__);
 }
 
+- (BOOL)shouldDynamicChangeTitleBottomViewWidth {
+    return NO;
+}
+
+- (CGFloat)titleBottomViewWidth {
+    return 60;
+}
+
 - (UIFont *)normalFontOfTitleLabel {
     return [UIFont systemFontOfSize:14];
 }

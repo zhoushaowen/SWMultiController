@@ -23,6 +23,7 @@
 @property (nonatomic) BOOL shouldIgnoreContentOffset;
 @property (nonatomic) BOOL sw_isViewDidAppeared;
 @property (nonatomic) SWMultiControllerObserver *observer;
+@property (nonatomic) CGFloat tmpTitleBottomViewWidth;
 
 @end
 
@@ -256,7 +257,7 @@
     }];
     self.topTitleScrollView.contentSize = CGSizeMake(totalWidth, 0);
     CGRect rect = [self.topTitleScrollView viewWithTag:100].frame;
-    self.titleBottomView.bounds = CGRectMake(0, 0, rect.size.width, [self titleBottomViewHeight]);
+    self.titleBottomView.bounds = CGRectMake(0, 0, [self shouldDynamicChangeTitleBottomViewWidth] ?  rect.size.width : self.tmpTitleBottomViewWidth, [self titleBottomViewHeight]);
     self.titleBottomView.center = CGPointMake(CGRectGetMidX(rect), [self topTitleViewHeight] - [self verticalSpaceBetweenBottom]);
     self.scrollBgView.contentSize = CGSizeMake(self.view.bounds.size.width*self.subViewControllers.count, 0);
 }
@@ -275,6 +276,14 @@
 }
 
 #pragma mark - Override
+- (BOOL)shouldDynamicChangeTitleBottomViewWidth {
+    return YES;
+}
+
+- (CGFloat)titleBottomViewWidth {
+    return 0;
+}
+
 - (CGFloat)topTitleViewHeight {
     return 60;
 }
@@ -453,9 +462,13 @@
     CGFloat centerXOffset = nextLabelCenterX - CGRectGetMidX(currentLabel.frame);
     CGRect bounds = self.titleBottomView.bounds;
     CGPoint center = self.titleBottomView.center;
-    bounds.size.width = currentLabelWidth + percent * widthOffset;
     center.x = CGRectGetMidX(currentLabel.frame) + percent * centerXOffset;
-    self.titleBottomView.bounds = bounds;
+    if([self shouldDynamicChangeTitleBottomViewWidth]){
+        bounds.size.width = currentLabelWidth + percent * widthOffset;
+        self.titleBottomView.bounds = bounds;
+    }else{
+        bounds.size.width = [self tmpTitleBottomViewWidth];
+    }
     self.titleBottomView.center = center;
 }
 
@@ -510,6 +523,14 @@
     return _observer;
 }
 
+- (CGFloat)tmpTitleBottomViewWidth {
+    CGFloat width = [self titleBottomViewWidth];
+    if(![self shouldDynamicChangeTitleBottomViewWidth]){
+        NSAssert(width > 0, @"titleBottomViewWidth必须返回一个大于0大数值");
+    }
+    return width;
+}
+
 #pragma mark - Public
 - (void)selectedIndex:(NSInteger)index {
     if(index == self.selectedIndex) return;
@@ -529,8 +550,12 @@
     [self updateTopTitleScrollViewContentSize];
     CGRect bounds = self.titleBottomView.bounds;
     CGPoint center = self.titleBottomView.center;
-    bounds.size.width = nextLabel.bounds.size.width;
     center.x = CGRectGetMidX(nextLabel.frame);
+    if([self shouldDynamicChangeTitleBottomViewWidth]){
+        bounds.size.width = nextLabel.bounds.size.width;
+    }else{
+        bounds.size.width = [self tmpTitleBottomViewWidth];
+    }
     self.titleBottomView.bounds = bounds;
     self.titleBottomView.center = center;
     [self addSubViewContollerViewIfNeeded:index];
