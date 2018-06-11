@@ -51,7 +51,6 @@
  顶部滑动视图的背景视图
  */
 @property (nonatomic,readonly,strong) UIView *topTitleView;
-
 /**
  是否隐藏标题下方的横线,默认NO
  */
@@ -71,6 +70,21 @@
  @return 索引
  */
 - (NSInteger)indexOfSubController:(UIViewController *)subController;
+
+#pragma mark - addHeaderView
+/**
+ 顶部的headerView
+ 如果要添加了,必须要在子控制器中调用下面两个方法
+ */
+@property (nonatomic,strong,nullable) UIView *multiControllerHeaderView;
+/**
+ 关联自动控制器和自控制器上的scrollView
+ */
+- (void)associateSubViewController:(UIViewController *)subViewController withScrollView:(UIScrollView *)scrollView;
+/**
+ 自控制器的scrollView滑动的时候调用
+ */
+- (void)subViewController:(UIViewController *)subViewController scrollViewDidScroll:(UIScrollView *)scrollView;
 
 #pragma mark - Override
 

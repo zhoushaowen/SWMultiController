@@ -8,6 +8,7 @@
 
 #import "SubViewController.h"
 #import "SWMultiController.h"
+#import <MJRefresh.h>
 
 @interface SubViewController ()<UITableViewDelegate,UITableViewDataSource>
 {
@@ -24,28 +25,43 @@
     _tableView.autoresizingMask = UIViewAutoresizingFlexibleHeight|UIViewAutoresizingFlexibleWidth;
     _tableView.delegate = self;
     _tableView.dataSource = self;
-    _tableView.backgroundColor = [UIColor colorWithRed:arc4random_uniform(256)/255.0f green:arc4random_uniform(256)/255.0f blue:arc4random_uniform(256)/255.0f alpha:1.0];
+//    _tableView.backgroundColor = [UIColor colorWithRed:arc4random_uniform(256)/255.0f green:arc4random_uniform(256)/255.0f blue:arc4random_uniform(256)/255.0f alpha:1.0];
+    [self.multiController associateSubViewController:self withScrollView:_tableView];
     [self.view addSubview:_tableView];
+    _tableView.mj_header = [MJRefreshNormalHeader headerWithRefreshingTarget:self refreshingAction:@selector(refresh)];
+    [_tableView.mj_header beginRefreshing];
+}
+
+- (void)refresh {
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        [_tableView.mj_header endRefreshing];
+    });
 }
 
 - (void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
-    NSLog(@"%s---index:%ld",__func__,[self.multiController indexOfSubController:self]);
+//    NSLog(@"%s---index:%ld",__func__,[self.multiController indexOfSubController:self]);
 }
 
 - (void)viewDidAppear:(BOOL)animated {
     [super viewDidAppear:animated];
-    NSLog(@"%s---index:%ld",__func__,[self.multiController indexOfSubController:self]);
+//    NSLog(@"%s---index:%ld",__func__,[self.multiController indexOfSubController:self]);
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
     [super viewWillDisappear:animated];
-    NSLog(@"%s---index:%ld",__func__,[self.multiController indexOfSubController:self]);
+//    NSLog(@"%s---index:%ld",__func__,[self.multiController indexOfSubController:self]);
 }
 
 - (void)viewDidDisappear:(BOOL)animated {
     [super viewDidDisappear:animated];
-    NSLog(@"%s---index:%ld",__func__,[self.multiController indexOfSubController:self]);
+//    NSLog(@"%s---index:%ld",__func__,[self.multiController indexOfSubController:self]);
+}
+
+- (void)scrollViewDidScroll:(UIScrollView *)scrollView {
+    if(scrollView == _tableView){
+        [self.multiController subViewController:self scrollViewDidScroll:scrollView];
+    }
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {

@@ -9,8 +9,12 @@
 #import "ViewController.h"
 #import "SubViewController.h"
 #import "SWMultiController.h"
+#import "MyHeaderView.h"
 
 @interface ViewController ()
+{
+    SWMultiController *_multiController;
+}
 
 @end
 
@@ -30,28 +34,26 @@
     }
     SWMultiController *vc = [[SWMultiController alloc] initWithSubControllers:mutableArr];
     [self addChildViewController:vc];
-    vc.view.frame = self.view.bounds;
+    _multiController = vc;
+    MyHeaderView *headerView = [MyHeaderView new];
+    headerView.backgroundColor = [UIColor redColor];
+    vc.multiControllerHeaderView = headerView;
     vc.view.autoresizingMask = UIViewAutoresizingFlexibleHeight|UIViewAutoresizingFlexibleWidth;
     [self.view addSubview:vc.view];
     [vc didMoveToParentViewController:self];
     [vc selectedIndex:1];
-    
-//    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(3 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-//        NSMutableArray *mutableArr = [NSMutableArray arrayWithCapacity:0];
-//        for (int i=0; i<5; i++) {
-//            SubViewController *subVC = [SubViewController new];
-//            subVC.title = [NSString stringWithFormat:@"测试标题%d",i];
-//            [mutableArr addObject:subVC];
-//        }
-//        [vc reloadWithSubViewControllers:mutableArr];
-//    });
-    
 }
 
-- (void)didReceiveMemoryWarning {
-    [super didReceiveMemoryWarning];
-    // Dispose of any resources that can be recreated.
+- (void)viewWillLayoutSubviews {
+    [super viewWillLayoutSubviews];
+    if (@available(iOS 11.0, *)) {
+        _multiController.view.frame = CGRectMake(0, self.view.safeAreaInsets.top, self.view.bounds.size.width, self.view.bounds.size.height - self.view.safeAreaInsets.top - self.view.safeAreaInsets.bottom);
+    } else {
+        _multiController.view.frame = CGRectMake(0, 64, self.view.bounds.size.width, self.view.bounds.size.height - 64);
+    }
 }
+
+
 
 
 @end

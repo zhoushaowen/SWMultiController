@@ -7,8 +7,11 @@
 //
 
 #import "SWMultiController.h"
+#import <objc/runtime.h>
 
 @interface SWMultiControllerObserver : NSObject
+
+@property (nonatomic,weak) SWMultiController *multiController;
 
 @end
 
@@ -25,6 +28,8 @@
 @property (nonatomic) SWMultiControllerObserver *observer;
 @property (nonatomic) CGFloat tmpTitleBottomViewWidth;
 
+- (UIScrollView *)sw_getAssociatedScrollViewWithSubViewController:(UIViewController *)subViewController;
+
 @end
 
 @implementation UIViewController (SWMultiController)
@@ -40,31 +45,48 @@
 @implementation SWMultiControllerObserver
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSKeyValueChangeKey,id> *)change context:(void *)context {
-    NSInteger oldIndex = [change[NSKeyValueChangeOldKey] integerValue];
-    NSInteger currentIndex = [change[NSKeyValueChangeNewKey] integerValue];
-//    NSLog(@"oldIndex:%ld-----currentIndex:%ld",(long)oldIndex,(long)currentIndex);
-    SWMultiController *multiController = (SWMultiController *)object;
-    if(oldIndex != - 1){
-        UIViewController *oldVC = multiController.subViewControllers[oldIndex];
-        if(!oldVC) return;
-        if(multiController.sw_isViewDidAppeared){
-            [oldVC beginAppearanceTransition:NO animated:YES];
-            [oldVC endAppearanceTransition];
+//    NSLog(@"%@------%@-------%@-----%@",object,keyPath,change,context);
+    if([keyPath isEqualToString:@"frame"]){
+        UIViewController *subVC = (__bridge UIViewController *)(context);
+        [self updateAssociatedScrollViewContentOffsetWithSubViewController:subVC];
+    }else if ([keyPath isEqualToString:@"selectedIndex"]){
+        NSInteger oldIndex = [change[NSKeyValueChangeOldKey] integerValue];
+        NSInteger currentIndex = [change[NSKeyValueChangeNewKey] integerValue];
+        //    NSLog(@"oldIndex:%ld-----currentIndex:%ld",(long)oldIndex,(long)currentIndex);
+        SWMultiController *multiController = (SWMultiController *)object;
+        if(oldIndex != - 1){
+            UIViewController *oldVC = multiController.subViewControllers[oldIndex];
+            if(!oldVC) return;
+            if(multiController.sw_isViewDidAppeared){
+                [oldVC beginAppearanceTransition:NO animated:YES];
+                [oldVC endAppearanceTransition];
+            }
+            if(multiController.didUnSelectedControllerBlock){
+                multiController.didUnSelectedControllerBlock(oldVC, oldIndex);
+            }
         }
-        if(multiController.didUnSelectedControllerBlock){
-            multiController.didUnSelectedControllerBlock(oldVC, oldIndex);
+        if(currentIndex != -1){
+            UIViewController *currentVC = multiController.subViewControllers[currentIndex];
+            if(!currentVC) return;
+            if(multiController.sw_isViewDidAppeared){
+                [currentVC beginAppearanceTransition:YES animated:YES];
+                [currentVC endAppearanceTransition];
+            }
+            if(multiController.didSelectedControllerBlock){
+                multiController.didSelectedControllerBlock(currentVC, currentIndex);
+            }
         }
     }
-    if(currentIndex != -1){
-        UIViewController *currentVC = multiController.subViewControllers[currentIndex];
-        if(!currentVC) return;
-        if(multiController.sw_isViewDidAppeared){
-            [currentVC beginAppearanceTransition:YES animated:YES];
-            [currentVC endAppearanceTransition];
-        }
-        if(multiController.didSelectedControllerBlock){
-            multiController.didSelectedControllerBlock(currentVC, currentIndex);
-        }
+}
+
+- (void)updateAssociatedScrollViewContentOffsetWithSubViewController:(UIViewController *)subVC {
+    NSInteger index = [self.multiController indexOfSubController:subVC];
+    if(index == self.multiController.selectedIndex) return;
+    UIScrollView *scrollView = [self.multiController sw_getAssociatedScrollViewWithSubViewController:subVC];
+    if(scrollView.contentOffset.y < - CGRectGetMaxY(self.multiController.topTitleView.frame)){
+        CGPoint offset = scrollView.contentOffset;
+        offset.y = - CGRectGetMaxY(self.multiController.topTitleView.frame);
+        scrollView.contentOffset = offset;
     }
 }
 
@@ -109,16 +131,20 @@
         scroll.showsVerticalScrollIndicator = NO;
         scroll.pagingEnabled = YES;
         scroll.delegate = self;
-        scroll.autoresizingMask = UIViewAutoresizingFlexibleHeight|UIViewAutoresizingFlexibleWidth;
         if(self.navigationController.interactivePopGestureRecognizer){
             [scroll.panGestureRecognizer requireGestureRecognizerToFail:self.navigationController.interactivePopGestureRecognizer];
         }
         [self.view addSubview:scroll];
         scroll;
     });
+    
     self.topTitleView = ({
         UIView *view = [UIView new];
-        view.frame = CGRectMake(0, 0, self.view.bounds.size.width, [self topTitleViewHeight]);
+        if(self.multiControllerHeaderView){
+            view.frame = CGRectMake(0, self.multiControllerHeaderView.bounds.size.height, self.view.bounds.size.width, [self topTitleViewHeight]);
+        }else{
+            view.frame = CGRectMake(0, 0, self.view.bounds.size.width, [self topTitleViewHeight]);
+        }
         view.autoresizingMask = UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleBottomMargin;
         view.backgroundColor = [UIColor blackColor];
         [self.view addSubview:view];
@@ -131,7 +157,6 @@
         } else {
             // Fallback on earlier versions
         }
-        scroll.autoresizingMask = UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight;
         scroll.showsVerticalScrollIndicator = NO;
         scroll.showsHorizontalScrollIndicator = NO;
         [self.topTitleView addSubview:scroll];
@@ -149,6 +174,27 @@
     });
     [self addTopTitleLabels];
     [self selectedIndex:0];
+}
+
+- (void)viewWillLayoutSubviews {
+    [super viewWillLayoutSubviews];
+    [self updateHeaderViewFrame];
+    if(self.multiControllerHeaderView){
+        self.scrollBgView.frame = CGRectMake(0, 0, self.view.bounds.size.width, self.view.bounds.size.height);
+    }else{
+        self.scrollBgView.frame = CGRectMake(0, [self topTitleViewHeight], self.view.bounds.size.width, self.view.bounds.size.height - [self topTitleViewHeight]);
+    }
+    [self.subViewControllers enumerateObjectsUsingBlock:^(UIViewController * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        if(obj.parentViewController){
+            obj.view.frame = CGRectMake(idx*self.scrollBgView.bounds.size.width, 0, self.scrollBgView.bounds.size.width, self.scrollBgView.bounds.size.height);
+        }
+    }];
+    if(self.multiControllerHeaderView){
+        self.topTitleView.frame = CGRectMake(0, self.multiControllerHeaderView.bounds.size.height, self.view.bounds.size.width, [self topTitleViewHeight]);
+    }else{
+        self.topTitleView.frame = CGRectMake(0, 0, self.view.bounds.size.width, [self topTitleViewHeight]);
+    }
+    self.topTitleScrollView.frame = self.topTitleView.bounds;
 }
 
 - (BOOL)shouldAutomaticallyForwardAppearanceMethods {
@@ -194,11 +240,6 @@
     } completion:^(id<UIViewControllerTransitionCoordinatorContext>  _Nonnull context) {
 //        NSLog(@"屏幕已经旋转+++++++++++++");
         if(!self.isViewLoaded) return;
-        [self.subViewControllers enumerateObjectsUsingBlock:^(UIViewController * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-            if(obj.parentViewController){
-                obj.view.frame = CGRectMake(self.view.bounds.size.width * idx, 0, self.view.bounds.size.width, self.view.bounds.size.height - [self topTitleViewHeight]);
-            }
-        }];
         [self.scrollBgView setContentSize:CGSizeMake(self.view.bounds.size.width*self.subViewControllers.count, 0)];
         self.shouldIgnoreContentOffset = YES;
         [self.scrollBgView setContentOffset:CGPointMake(self.view.bounds.size.width*self.selectedIndex, 0) animated:NO];
@@ -512,13 +553,10 @@
     [self addObserver:self.observer forKeyPath:@"selectedIndex" options:NSKeyValueObservingOptionNew|NSKeyValueObservingOptionOld context:nil];
 }
 
-- (void)removeObserver {
-    [self removeObserver:self.observer forKeyPath:@"selectedIndex"];
-}
-
 - (SWMultiControllerObserver *)observer {
     if(!_observer){
         _observer = [SWMultiControllerObserver new];
+        _observer.multiController = self;
     }
     return _observer;
 }
@@ -529,6 +567,33 @@
         NSAssert(width > 0, @"titleBottomViewWidth必须返回一个大于0大数值");
     }
     return width;
+}
+
+- (void)updateSubViewControllerScrollViewContentOffset:(UIScrollView *)scrollView {
+    if(self.multiControllerHeaderView){
+        scrollView.contentInset = UIEdgeInsetsMake(self.multiControllerHeaderView.bounds.size.height + [self topTitleViewHeight], 0, 0, 0);
+        scrollView.scrollIndicatorInsets = scrollView.contentInset;
+        CGPoint offset = scrollView.contentOffset;
+        offset.y = - CGRectGetMaxY(self.topTitleView.frame);
+        scrollView.contentOffset = offset;
+    }else{
+        scrollView.contentInset = UIEdgeInsetsZero;
+        scrollView.scrollIndicatorInsets = UIEdgeInsetsZero;
+    }
+}
+
+- (UIScrollView *)sw_getAssociatedScrollViewWithSubViewController:(UIViewController *)subViewController {
+    return objc_getAssociatedObject(subViewController, @selector(sw_getAssociatedScrollViewWithSubViewController:));
+}
+
+- (void)updateHeaderViewFrame {
+    CGRect headerViewFrame = _multiControllerHeaderView.frame;
+    headerViewFrame.origin = CGPointZero;
+    headerViewFrame.size.width = self.view.bounds.size.width;
+    if(headerViewFrame.size.height <= 0){
+        headerViewFrame.size.height = 200;
+    }
+    _multiControllerHeaderView.frame = headerViewFrame;
 }
 
 #pragma mark - Public
@@ -598,9 +663,74 @@
     self.titleBottomView.hidden = _hiddenTitleBottomView;
 }
 
+- (void)subViewController:(UIViewController *)subViewController scrollViewDidScroll:(UIScrollView *)scrollView {
+    if(scrollView == nil) return;
+    if(self.multiControllerHeaderView == nil) return;
+    if(scrollView.contentOffset.y < - (self.multiControllerHeaderView.bounds.size.height + [self topTitleViewHeight])){
+        CGRect multiControllerHeaderViewFrame = self.multiControllerHeaderView.frame;
+        multiControllerHeaderViewFrame.origin.y = 0;
+        self.multiControllerHeaderView.frame = multiControllerHeaderViewFrame;
+        CGRect topTitleViewFrame = self.topTitleView.frame;
+        topTitleViewFrame.origin.y = self.multiControllerHeaderView.bounds.size.height;
+        self.topTitleView.frame = topTitleViewFrame;
+        return;
+    }
+    CGRect multiControllerHeaderViewFrame = self.multiControllerHeaderView.frame;
+    multiControllerHeaderViewFrame.origin.y = - (scrollView.contentOffset.y + multiControllerHeaderViewFrame.size.height + [self topTitleViewHeight]);
+    self.multiControllerHeaderView.frame = multiControllerHeaderViewFrame;
+    if(scrollView.contentOffset.y <= - [self topTitleViewHeight]){
+        CGRect topTitleViewFrame = self.topTitleView.frame;
+        topTitleViewFrame.origin.y = - (scrollView.contentOffset.y + [self topTitleViewHeight]);
+        self.topTitleView.frame = topTitleViewFrame;
+    }else{
+        CGRect topTitleViewFrame = self.topTitleView.frame;
+        topTitleViewFrame.origin.y = 0;
+        self.topTitleView.frame = topTitleViewFrame;
+    }
+}
+
+- (void)associateSubViewController:(UIViewController *)subViewController withScrollView:(UIScrollView *)scrollView {
+    if(self.multiControllerHeaderView == nil) return;
+    NSAssert([self sw_getAssociatedScrollViewWithSubViewController:subViewController] == nil, @"同一个subViewController不要关联多次");
+    objc_setAssociatedObject(subViewController, @selector(sw_getAssociatedScrollViewWithSubViewController:), scrollView, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    [self.topTitleView addObserver:self.observer forKeyPath:@"frame" options:NSKeyValueObservingOptionInitial|NSKeyValueObservingOptionNew context:(__bridge void * _Nullable)(subViewController)];
+    objc_setAssociatedObject(self.topTitleView, @selector(topTitleView), @(YES), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    [self updateSubViewControllerScrollViewContentOffset:scrollView];
+}
+
+- (void)setMultiControllerHeaderView:(UIView *)multiControllerHeaderView {
+    if(_multiControllerHeaderView){
+        [_multiControllerHeaderView removeFromSuperview];
+    }
+    _multiControllerHeaderView = multiControllerHeaderView;
+    [self updateHeaderViewFrame];
+    if(_multiControllerHeaderView.superview == nil){
+        [self.view insertSubview:_multiControllerHeaderView aboveSubview:self.scrollBgView];
+    }
+    [self.view setNeedsLayout];
+    [self.view layoutIfNeeded];
+    [self.subViewControllers enumerateObjectsUsingBlock:^(UIViewController * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        UIScrollView *scrollView = [self sw_getAssociatedScrollViewWithSubViewController:obj];
+        if(scrollView){
+            [self updateSubViewControllerScrollViewContentOffset:scrollView];
+        }
+    }];
+}
+
+#pragma mark - dealloc
 - (void)dealloc {
     NSLog(@"%s",__func__);
-    [self removeObserver];
+    [self removeObserver:self.observer forKeyPath:@"selectedIndex"];
+    @try {
+        if([objc_getAssociatedObject(self.topTitleView, @selector(topTitleView)) boolValue]){
+            //移除所有包含context的通知
+            [self.topTitleView removeObserver:self.observer forKeyPath:@"frame"];
+        }
+    } @catch (NSException *exception) {
+        NSLog(@"removeObserverException:%@",exception);
+    } @finally {
+
+    }
 }
 
 
