@@ -20,7 +20,7 @@
 
 /**
  初始化方法
-
+ 
  @param subControllers 自控制器
  @return SWMultiController
  */
@@ -29,7 +29,7 @@
 
 /**
  刷新控制器当中的子控制器,刷新之后默认会选中index 0
-
+ 
  @param subViewControllers 自控制器
  */
 - (void)reloadWithSubViewControllers:(NSArray<UIViewController *> *)subViewControllers;
@@ -58,14 +58,14 @@
 
 /**
  手动选择某个索引
-
+ 
  @param index 索引
  */
 - (void)selectedIndex:(NSInteger)index;
 
 /**
  获取某个子控制器在当前多控制器当中的索引
-
+ 
  @param subController 子控制器
  @return 索引
  */
@@ -104,6 +104,15 @@
  可以重写此方法,进行自定义
  */
 - (CGFloat)topTitleViewHeight;
+
+/**
+ 最左边的label距离左边的间距,默认值是20
+ */
+- (CGFloat)topTitleViewLeftLabelInset;
+/**
+ 最右边的label距离右边的间距,默认值是20
+ */
+- (CGFloat)topTitleViewRightLabelInset;
 
 /**
  标题之间的水平间距
@@ -174,4 +183,6 @@
 
 
 
+
 @end
+

@@ -45,7 +45,7 @@
 @implementation SWMultiControllerObserver
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSKeyValueChangeKey,id> *)change context:(void *)context {
-//    NSLog(@"%@------%@-------%@-----%@",object,keyPath,change,context);
+    //    NSLog(@"%@------%@-------%@-----%@",object,keyPath,change,context);
     if([keyPath isEqualToString:@"frame"]){
         UIViewController *subVC = (__bridge UIViewController *)(context);
         [self updateAssociatedScrollViewContentOffsetWithSubViewController:subVC];
@@ -203,7 +203,7 @@
 
 - (void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
-//    NSLog(@"%s",__func__);
+    //    NSLog(@"%s",__func__);
     [self.childViewControllers enumerateObjectsUsingBlock:^(__kindof UIViewController * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
         [obj beginAppearanceTransition:YES animated:animated];
     }];
@@ -211,7 +211,7 @@
 
 - (void)viewDidAppear:(BOOL)animated {
     [super viewDidAppear:animated];
-//    NSLog(@"%s",__func__);
+    //    NSLog(@"%s",__func__);
     self.sw_isViewDidAppeared = YES;
     [self.childViewControllers enumerateObjectsUsingBlock:^(__kindof UIViewController * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
         [obj endAppearanceTransition];
@@ -220,7 +220,7 @@
 
 - (void)viewWillDisappear:(BOOL)animated {
     [super viewWillDisappear:animated];
-//    NSLog(@"%s",__func__);
+    //    NSLog(@"%s",__func__);
     [self.childViewControllers enumerateObjectsUsingBlock:^(__kindof UIViewController * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
         [obj beginAppearanceTransition:NO animated:animated];
     }];
@@ -228,7 +228,7 @@
 
 - (void)viewDidDisappear:(BOOL)animated {
     [super viewDidDisappear:animated];
-//    NSLog(@"%s",__func__);
+    //    NSLog(@"%s",__func__);
     [self.childViewControllers enumerateObjectsUsingBlock:^(__kindof UIViewController * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
         [obj endAppearanceTransition];
     }];
@@ -236,9 +236,9 @@
 
 - (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator {
     [coordinator animateAlongsideTransition:^(id<UIViewControllerTransitionCoordinatorContext>  _Nonnull context) {
-//        NSLog(@"屏幕即将旋转------------");
+        //        NSLog(@"屏幕即将旋转------------");
     } completion:^(id<UIViewControllerTransitionCoordinatorContext>  _Nonnull context) {
-//        NSLog(@"屏幕已经旋转+++++++++++++");
+        //        NSLog(@"屏幕已经旋转+++++++++++++");
         if(!self.isViewLoaded) return;
         [self.scrollBgView setContentSize:CGSizeMake(self.view.bounds.size.width*self.subViewControllers.count, 0)];
         self.shouldIgnoreContentOffset = YES;
@@ -263,13 +263,14 @@
         self.titleBottomView.center = center;
     }];
     [super viewWillTransitionToSize:size withTransitionCoordinator:coordinator];
-//    NSLog(@"%@",NSStringFromCGSize(size));
+    //    NSLog(@"%@",NSStringFromCGSize(size));
 }
 
 - (void)addTopTitleLabels {
     if(!self.isViewLoaded) return;
     if(self.subViewControllers.count < 1) return;
-    __block CGFloat totalWidth = [self horizontalSpaceOfTitleLabel];
+    //    __block CGFloat totalWidth = [self horizontalSpaceOfTitleLabel];
+    __block CGFloat totalWidth = [self topTitleViewLeftLabelInset];
     [self.subViewControllers enumerateObjectsUsingBlock:^(__kindof UIViewController * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
         UILabel *label = [UILabel new];
         label.numberOfLines = 0;
@@ -294,12 +295,16 @@
         label.attributedText = attributedStr;
         CGSize size = [label sizeThatFits:CGSizeMake(MAXFLOAT, [self topTitleViewHeight])];
         label.frame = CGRectMake(totalWidth, 0, size.width, [self topTitleViewHeight]);
-        totalWidth += size.width + [self horizontalSpaceOfTitleLabel];
+        if(idx == self.subViewControllers.count - 1){
+            totalWidth += size.width + [self topTitleViewRightLabelInset];
+        }else{
+            totalWidth += size.width + [self horizontalSpaceOfTitleLabel];
+        }
     }];
     self.topTitleScrollView.contentSize = CGSizeMake(totalWidth, 0);
     CGRect rect = [self.topTitleScrollView viewWithTag:100].frame;
     self.titleBottomView.bounds = CGRectMake(0, 0, [self shouldDynamicChangeTitleBottomViewWidth] ?  rect.size.width : self.tmpTitleBottomViewWidth, [self titleBottomViewHeight]);
-    self.titleBottomView.center = CGPointMake(CGRectGetMidX(rect), [self topTitleViewHeight] - [self verticalSpaceBetweenBottom]);
+    self.titleBottomView.center = CGPointMake(CGRectGetMidX(rect), [self topTitleViewHeight] - [self verticalSpaceBetweenBottom] - [self titleBottomViewHeight]/2.0);
     self.scrollBgView.contentSize = CGSizeMake(self.view.bounds.size.width*self.subViewControllers.count, 0);
 }
 
@@ -373,6 +378,14 @@
     return 0;
 }
 
+- (CGFloat)topTitleViewLeftLabelInset {
+    return 20;
+}
+
+- (CGFloat)topTitleViewRightLabelInset {
+    return 20;
+}
+
 #pragma mark - UIGestureRecognizerDelegate
 - (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldReceiveTouch:(UITouch *)touch {
     if(![touch.view isKindOfClass:[UILabel class]]) return NO;
@@ -403,7 +416,8 @@
     [self updateTopTitleScrollViewContentSize];
     [self changeTitleBottomViewWithCurrentIndex:currentIndex percent:percent currentLabel:currentLabel nextLabel:nextLabel];
     if(contentOffset.x > (self.subViewControllers.count - 2) * scrollView.bounds.size.width ){//当前快滑动到最后一个index的时候,先更新topTitleScrollView的contentSize
-        CGFloat totalWidth = [self horizontalSpaceOfTitleLabel];
+        //        CGFloat totalWidth = [self horizontalSpaceOfTitleLabel];
+        CGFloat totalWidth = [self topTitleViewLeftLabelInset];
         for (int i=0; i<self.subViewControllers.count; i++) {
             UILabel *label = [self.topTitleScrollView viewWithTag:i+100];
             CGFloat width = 0;
@@ -418,7 +432,11 @@
                 tmpLabel.font = [self selectedFontOfTitleLabel];
             }
             width = [tmpLabel sizeThatFits:CGSizeMake(MAXFLOAT, [self topTitleViewHeight])].width;
-            totalWidth += width + [self horizontalSpaceOfTitleLabel];
+            if(i == self.subViewControllers.count - 1){
+                totalWidth += width + [self topTitleViewRightLabelInset];
+            }else{
+                totalWidth += width + [self horizontalSpaceOfTitleLabel];
+            }
         }
         if(totalWidth < self.topTitleScrollView.bounds.size.width){
             totalWidth = self.topTitleScrollView.bounds.size.width;
@@ -428,18 +446,18 @@
 }
 
 - (void)scrollViewWillEndDragging:(UIScrollView *)scrollView withVelocity:(CGPoint)velocity targetContentOffset:(inout CGPoint *)targetContentOffset {
-//    NSLog(@"%@",NSStringFromCGPoint(*targetContentOffset));
+    //    NSLog(@"%@",NSStringFromCGPoint(*targetContentOffset));
     NSInteger index = (*targetContentOffset).x/scrollView.bounds.size.width;
-//    NSLog(@"%ld",(long)index);
+    //    NSLog(@"%ld",(long)index);
     if(index < 0 || index > self.subViewControllers.count - 1) return;
     UILabel *label = [self.topTitleScrollView viewWithTag:index + 100];
     [self setLabelToCenter:label animated:YES];
 }
 
 - (void)scrollViewDidEndDragging:(UIScrollView *)scrollView willDecelerate:(BOOL)decelerate {
-//    NSLog(@"%@",NSStringFromCGPoint(scrollView.contentOffset));
+    //    NSLog(@"%@",NSStringFromCGPoint(scrollView.contentOffset));
     NSInteger index = scrollView.contentOffset.x/scrollView.bounds.size.width;
-//    NSLog(@"%ld",(long)index);
+    //    NSLog(@"%ld",(long)index);
     if(index < 0 || index > self.subViewControllers.count - 1) return;
     if(!decelerate){
         [self addSubViewContollerViewIfNeeded:index];
@@ -514,12 +532,17 @@
 }
 
 - (void)updateTopTitleScrollViewContentSize {
-    CGFloat totalWidth = [self horizontalSpaceOfTitleLabel];
+    //    CGFloat totalWidth = [self horizontalSpaceOfTitleLabel];
+    CGFloat totalWidth = [self topTitleViewLeftLabelInset];
     for(int i=0;i<self.subViewControllers.count;i++){
         UILabel *label = [self.topTitleScrollView viewWithTag:i + 100];
         CGSize size = [label sizeThatFits:CGSizeMake(MAXFLOAT, [self topTitleViewHeight])];
         label.frame = CGRectMake(totalWidth, 0, size.width, [self topTitleViewHeight]);
-        totalWidth += size.width + [self horizontalSpaceOfTitleLabel];
+        if(i == self.subViewControllers.count - 1){
+            totalWidth += size.width + [self topTitleViewRightLabelInset];
+        }else{
+            totalWidth += size.width + [self horizontalSpaceOfTitleLabel];
+        }
     }
     if(totalWidth < self.topTitleScrollView.bounds.size.width){
         totalWidth = self.topTitleScrollView.bounds.size.width;
@@ -729,9 +752,10 @@
     } @catch (NSException *exception) {
         NSLog(@"removeObserverException:%@",exception);
     } @finally {
-
+        
     }
 }
 
 
 @end
+
