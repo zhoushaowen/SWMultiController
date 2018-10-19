@@ -513,10 +513,12 @@
         CGFloat width = 0;
         if(i == (currentIndex + 1)){//如果是最后一个label,只需计算出label长度的一半
             width = [label sizeThatFits:CGSizeMake(MAXFLOAT, [self topTitleViewHeight])].width/2.0f;
+            nextLabelCenterX += width + [self topTitleViewRightLabelInset];
         }else{
             width = [label sizeThatFits:CGSizeMake(MAXFLOAT, [self topTitleViewHeight])].width;
+            nextLabelCenterX += width + [self horizontalSpaceOfTitleLabel];
         }
-        nextLabelCenterX += width + [self horizontalSpaceOfTitleLabel];
+        //        nextLabelCenterX += width + [self horizontalSpaceOfTitleLabel];
     }
     CGFloat centerXOffset = nextLabelCenterX - CGRectGetMidX(currentLabel.frame);
     CGRect bounds = self.titleBottomView.bounds;

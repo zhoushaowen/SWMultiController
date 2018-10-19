@@ -82,7 +82,7 @@
  */
 - (void)associateSubViewController:(UIViewController *)subViewController withScrollView:(UIScrollView *)scrollView;
 /**
- 自控制器的scrollView滑动的时候调用
+ 子控制器的scrollView滑动的时候调用
  */
 - (void)subViewController:(UIViewController *)subViewController scrollViewDidScroll:(UIScrollView *)scrollView;
 
