@@ -37,6 +37,7 @@
     [self addChildViewController:vc];
     _multiController = vc;
     MyHeaderView *headerView = [MyHeaderView new];
+    headerView.frame = CGRectMake(0, 0, self.view.bounds.size.width, 500);
     headerView.backgroundColor = [UIColor redColor];
     vc.multiControllerHeaderView = headerView;
     vc.view.autoresizingMask = UIViewAutoresizingFlexibleHeight|UIViewAutoresizingFlexibleWidth;

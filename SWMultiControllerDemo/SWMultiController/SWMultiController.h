@@ -44,6 +44,11 @@
 @property (nonatomic,strong) void(^didUnSelectedControllerBlock)(UIViewController *unSelectedController,NSInteger index);
 
 /**
+ scrollBgView滑动时候调用
+ */
+@property (nonatomic,strong) void(^scrollBgViewDidScrollBlock)(UIScrollView *scrollBgView);
+
+/**
  最底层的scrollView
  */
 @property (nonatomic,readonly,strong) UIScrollView *scrollBgView;

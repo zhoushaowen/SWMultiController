@@ -394,6 +394,9 @@
 
 #pragma mark - UIScrollViewDelegate
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView {
+    if(_scrollBgViewDidScrollBlock){
+        _scrollBgViewDidScrollBlock(scrollView);
+    }
     if(_shouldIgnoreContentOffset){
         _shouldIgnoreContentOffset = NO;
         return;
@@ -750,19 +753,26 @@
 }
 
 - (void)panGesture:(UIPanGestureRecognizer *)gesture {
+    CGPoint translation = [gesture translationInView:gesture.view];
+    CGPoint velocity = [gesture velocityInView:gesture.view];
+    UIViewController *vc = self.subViewControllers[self.selectedIndex];
+    UIScrollView *scrollView = [self sw_getAssociatedScrollViewWithSubViewController:vc];
+    if(scrollView == nil) return;
+    CGPoint contentOffset = scrollView.contentOffset;
+    contentOffset.y -= translation.y;
+    if(contentOffset.y < -scrollView.contentInset.top){
+        contentOffset.y = - scrollView.contentInset.top;
+    }
+    [scrollView setContentOffset:contentOffset animated:NO];
     if(gesture.state == UIGestureRecognizerStateChanged){
-        CGPoint translation = [gesture translationInView:gesture.view];
-        UIViewController *vc = self.subViewControllers[self.selectedIndex];
-        UIScrollView *scrollView = [self sw_getAssociatedScrollViewWithSubViewController:vc];
-        if(scrollView){
-            CGPoint contentOffset = scrollView.contentOffset;
-            contentOffset.y -= translation.y;
-            if(contentOffset.y < -scrollView.contentInset.top){
-                contentOffset.y = - scrollView.contentInset.top;
-            }
-            [scrollView setContentOffset:contentOffset animated:NO];
-        }
         [gesture setTranslation:CGPointZero inView:gesture.view];
+    }else if (gesture.state == UIGestureRecognizerStateEnded || gesture.state == UIGestureRecognizerStateCancelled){
+        NSLog(@"%f",velocity.y);
+        if(velocity.y < -1000){
+            [scrollView setContentOffset:CGPointMake(0, -[self topTitleViewHeight]) animated:YES];
+        }else if (velocity.y > 1000){
+            [scrollView setContentOffset:CGPointMake(0, -scrollView.contentInset.top) animated:YES];
+        }
     }
 }
 
