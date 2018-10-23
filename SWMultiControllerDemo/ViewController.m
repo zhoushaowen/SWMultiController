@@ -33,6 +33,7 @@
         [mutableArr addObject:subVC];
     }
     SWMultiController *vc = [[SWMultiController alloc] initWithSubControllers:mutableArr];
+    vc.topTitleViewFloatOffsetY = 64;
     [self addChildViewController:vc];
     _multiController = vc;
     MyHeaderView *headerView = [MyHeaderView new];
@@ -46,11 +47,12 @@
 
 - (void)viewWillLayoutSubviews {
     [super viewWillLayoutSubviews];
-    if (@available(iOS 11.0, *)) {
-        _multiController.view.frame = CGRectMake(0, self.view.safeAreaInsets.top, self.view.bounds.size.width, self.view.bounds.size.height - self.view.safeAreaInsets.top - self.view.safeAreaInsets.bottom);
-    } else {
-        _multiController.view.frame = CGRectMake(0, 64, self.view.bounds.size.width, self.view.bounds.size.height - 64);
-    }
+    _multiController.view.frame = self.view.bounds;
+//    if (@available(iOS 11.0, *)) {
+//        _multiController.view.frame = CGRectMake(0, self.view.safeAreaInsets.top, self.view.bounds.size.width, self.view.bounds.size.height - self.view.safeAreaInsets.top - self.view.safeAreaInsets.bottom);
+//    } else {
+//        _multiController.view.frame = CGRectMake(0, 64, self.view.bounds.size.width, self.view.bounds.size.height - 64);
+//    }
 }
 
 

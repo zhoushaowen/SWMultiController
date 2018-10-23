@@ -703,13 +703,13 @@
     CGRect multiControllerHeaderViewFrame = self.multiControllerHeaderView.frame;
     multiControllerHeaderViewFrame.origin.y = - (scrollView.contentOffset.y + multiControllerHeaderViewFrame.size.height + [self topTitleViewHeight]);
     self.multiControllerHeaderView.frame = multiControllerHeaderViewFrame;
-    if(scrollView.contentOffset.y <= - [self topTitleViewHeight]){
+    if(scrollView.contentOffset.y <= - [self topTitleViewHeight] - self.topTitleViewFloatOffsetY){
         CGRect topTitleViewFrame = self.topTitleView.frame;
         topTitleViewFrame.origin.y = - (scrollView.contentOffset.y + [self topTitleViewHeight]);
         self.topTitleView.frame = topTitleViewFrame;
     }else{
         CGRect topTitleViewFrame = self.topTitleView.frame;
-        topTitleViewFrame.origin.y = 0;
+        topTitleViewFrame.origin.y = self.topTitleViewFloatOffsetY;
         self.topTitleView.frame = topTitleViewFrame;
     }
 }
@@ -720,6 +720,11 @@
     objc_setAssociatedObject(subViewController, @selector(sw_getAssociatedScrollViewWithSubViewController:), scrollView, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     [self.topTitleView addObserver:self.observer forKeyPath:@"frame" options:NSKeyValueObservingOptionInitial|NSKeyValueObservingOptionNew context:(__bridge void * _Nullable)(subViewController)];
     objc_setAssociatedObject(self.topTitleView, @selector(topTitleView), @(YES), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    if (@available(iOS 11.0, *)) {
+        scrollView.contentInsetAdjustmentBehavior = UIScrollViewContentInsetAdjustmentNever;
+    } else {
+        // Fallback on earlier versions
+    }
     [self updateSubViewControllerScrollViewContentOffset:scrollView];
 }
 
@@ -740,6 +745,25 @@
             [self updateSubViewControllerScrollViewContentOffset:scrollView];
         }
     }];
+    UIPanGestureRecognizer *panGesture = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(panGesture:)];
+    [_multiControllerHeaderView addGestureRecognizer:panGesture];
+}
+
+- (void)panGesture:(UIPanGestureRecognizer *)gesture {
+    if(gesture.state == UIGestureRecognizerStateChanged){
+        CGPoint translation = [gesture translationInView:gesture.view];
+        UIViewController *vc = self.subViewControllers[self.selectedIndex];
+        UIScrollView *scrollView = [self sw_getAssociatedScrollViewWithSubViewController:vc];
+        if(scrollView){
+            CGPoint contentOffset = scrollView.contentOffset;
+            contentOffset.y -= translation.y;
+            if(contentOffset.y < -scrollView.contentInset.top){
+                contentOffset.y = - scrollView.contentInset.top;
+            }
+            [scrollView setContentOffset:contentOffset animated:NO];
+        }
+        [gesture setTranslation:CGPointZero inView:gesture.view];
+    }
 }
 
 #pragma mark - dealloc

@@ -77,6 +77,11 @@
  如果要添加了,必须要在子控制器中调用下面两个方法
  */
 @property (nonatomic,strong,nullable) UIView *multiControllerHeaderView;
+
+/**
+ 顶部titleView的浮动偏移量,默认是0
+ */
+@property (nonatomic) CGFloat topTitleViewFloatOffsetY;
 /**
  关联自动控制器和自控制器上的scrollView
  */
