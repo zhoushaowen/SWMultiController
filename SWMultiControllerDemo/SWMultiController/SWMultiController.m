@@ -24,6 +24,7 @@
 @property (nonatomic,copy) NSArray<UIViewController *> *subViewControllers;
 @property (nonatomic) NSInteger selectedIndex;
 @property (nonatomic) BOOL shouldIgnoreContentOffset;
+@property (nonatomic) BOOL shouldIgnoreSubVCContentOffset;
 @property (nonatomic) BOOL sw_isViewDidAppeared;
 @property (nonatomic) SWMultiControllerObserver *observer;
 @property (nonatomic) CGFloat tmpTitleBottomViewWidth;
@@ -599,11 +600,13 @@
 
 - (void)updateSubViewControllerScrollViewContentOffset:(UIScrollView *)scrollView {
     if(self.multiControllerHeaderView){
+        self.shouldIgnoreSubVCContentOffset = YES;
         scrollView.contentInset = UIEdgeInsetsMake(self.multiControllerHeaderView.bounds.size.height + [self topTitleViewHeight], 0, 0, 0);
         scrollView.scrollIndicatorInsets = scrollView.contentInset;
         CGPoint offset = scrollView.contentOffset;
         offset.y = - CGRectGetMaxY(self.topTitleView.frame);
         scrollView.contentOffset = offset;
+        self.shouldIgnoreSubVCContentOffset = NO;
     }else{
         scrollView.contentInset = UIEdgeInsetsZero;
         scrollView.scrollIndicatorInsets = UIEdgeInsetsZero;
@@ -692,8 +695,11 @@
 }
 
 - (void)subViewController:(UIViewController *)subViewController scrollViewDidScroll:(UIScrollView *)scrollView {
+    if(self.shouldIgnoreSubVCContentOffset) return;
     if(scrollView == nil) return;
     if(self.multiControllerHeaderView == nil) return;
+    UIScrollView *associatedScroll = [self sw_getAssociatedScrollViewWithSubViewController:subViewController];
+    if(associatedScroll == nil) return;
     if(scrollView.contentOffset.y < - (self.multiControllerHeaderView.bounds.size.height + [self topTitleViewHeight])){
         CGRect multiControllerHeaderViewFrame = self.multiControllerHeaderView.frame;
         multiControllerHeaderViewFrame.origin.y = 0;
@@ -728,7 +734,13 @@
     } else {
         // Fallback on earlier versions
     }
-    [self updateSubViewControllerScrollViewContentOffset:scrollView];
+    //bug fix
+    //在subViewController刚刚viewDidLoad的时候,改变UIScrollView的contentOffset,会被重置,所以延时执行解决这个问题
+    scrollView.hidden = YES;
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        scrollView.hidden = NO;
+        [self updateSubViewControllerScrollViewContentOffset:scrollView];
+    });
 }
 
 - (void)setMultiControllerHeaderView:(UIView *)multiControllerHeaderView {
@@ -769,7 +781,7 @@
     }else if (gesture.state == UIGestureRecognizerStateEnded || gesture.state == UIGestureRecognizerStateCancelled){
         NSLog(@"%f",velocity.y);
         if(velocity.y < -1000){
-            [scrollView setContentOffset:CGPointMake(0, -[self topTitleViewHeight]) animated:YES];
+            [scrollView setContentOffset:CGPointMake(0, -[self topTitleViewHeight] - [self topTitleViewFloatOffsetY]) animated:YES];
         }else if (velocity.y > 1000){
             [scrollView setContentOffset:CGPointMake(0, -scrollView.contentInset.top) animated:YES];
         }
