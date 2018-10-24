@@ -96,6 +96,11 @@
  */
 - (void)subViewController:(UIViewController *)subViewController scrollViewDidScroll:(UIScrollView *)scrollView;
 
+/**
+ 当multiControllerHeaderView的frame放生改变时,需要手动调用此方法更新布局
+ */
+- (void)updateHeaderViewFrame;
+
 #pragma mark - Override
 
 /**

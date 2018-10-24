@@ -617,16 +617,6 @@
     return objc_getAssociatedObject(subViewController, @selector(sw_getAssociatedScrollViewWithSubViewController:));
 }
 
-- (void)updateHeaderViewFrame {
-    CGRect headerViewFrame = _multiControllerHeaderView.frame;
-    headerViewFrame.origin = CGPointZero;
-    headerViewFrame.size.width = self.view.bounds.size.width;
-    if(headerViewFrame.size.height <= 0){
-        headerViewFrame.size.height = 200;
-    }
-    _multiControllerHeaderView.frame = headerViewFrame;
-}
-
 #pragma mark - Public
 - (void)selectedIndex:(NSInteger)index {
     if(index == self.selectedIndex) return;
@@ -743,23 +733,31 @@
     });
 }
 
-- (void)setMultiControllerHeaderView:(UIView *)multiControllerHeaderView {
-    if(_multiControllerHeaderView){
-        [_multiControllerHeaderView removeFromSuperview];
+- (void)updateHeaderViewFrame {
+    CGRect headerViewFrame = _multiControllerHeaderView.frame;
+    headerViewFrame.origin = CGPointZero;
+    headerViewFrame.size.width = self.view.bounds.size.width;
+    if(headerViewFrame.size.height <= 0){
+        headerViewFrame.size.height = 200;
     }
-    _multiControllerHeaderView = multiControllerHeaderView;
-    [self updateHeaderViewFrame];
-    if(_multiControllerHeaderView.superview == nil){
-        [self.view insertSubview:_multiControllerHeaderView aboveSubview:self.scrollBgView];
-    }
-    [self.view setNeedsLayout];
-    [self.view layoutIfNeeded];
+    _multiControllerHeaderView.frame = headerViewFrame;
     [self.subViewControllers enumerateObjectsUsingBlock:^(UIViewController * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
         UIScrollView *scrollView = [self sw_getAssociatedScrollViewWithSubViewController:obj];
         if(scrollView){
             [self updateSubViewControllerScrollViewContentOffset:scrollView];
         }
     }];
+}
+
+- (void)setMultiControllerHeaderView:(UIView *)multiControllerHeaderView {
+    if(_multiControllerHeaderView){
+        [_multiControllerHeaderView removeFromSuperview];
+    }
+    _multiControllerHeaderView = multiControllerHeaderView;
+    if(_multiControllerHeaderView.superview == nil){
+        [self.view insertSubview:_multiControllerHeaderView aboveSubview:self.scrollBgView];
+    }
+    [self updateHeaderViewFrame];
     UIPanGestureRecognizer *panGesture = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(panGesture:)];
     [_multiControllerHeaderView addGestureRecognizer:panGesture];
 }
