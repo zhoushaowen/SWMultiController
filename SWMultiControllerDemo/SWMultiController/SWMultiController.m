@@ -16,7 +16,9 @@
 @end
 
 @interface SWMultiController ()
-
+{
+    BOOL _flag;
+}
 @property (nonatomic) UIView *topTitleView;
 @property (nonatomic) UIScrollView *scrollBgView;
 @property (nonatomic) UIScrollView *topTitleScrollView;
@@ -179,8 +181,16 @@
 
 - (void)viewWillLayoutSubviews {
     [super viewWillLayoutSubviews];
-    [self updateHeaderViewFrame];
+    if(_flag) return;
+    _flag = YES;
     if(self.multiControllerHeaderView){
+        CGRect headerViewFrame = _multiControllerHeaderView.frame;
+        headerViewFrame.origin = CGPointZero;
+        headerViewFrame.size.width = self.view.bounds.size.width;
+        if(headerViewFrame.size.height <= 0){
+            headerViewFrame.size.height = 200;
+        }
+        _multiControllerHeaderView.frame = headerViewFrame;
         self.scrollBgView.frame = CGRectMake(0, 0, self.view.bounds.size.width, self.view.bounds.size.height);
     }else{
         self.scrollBgView.frame = CGRectMake(0, [self topTitleViewHeight], self.view.bounds.size.width, self.view.bounds.size.height - [self topTitleViewHeight]);
@@ -236,6 +246,7 @@
 }
 
 - (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator {
+    _flag = NO;
     [coordinator animateAlongsideTransition:^(id<UIViewControllerTransitionCoordinatorContext>  _Nonnull context) {
         //        NSLog(@"屏幕即将旋转------------");
     } completion:^(id<UIViewControllerTransitionCoordinatorContext>  _Nonnull context) {
@@ -804,4 +815,5 @@
 
 
 @end
+
 
