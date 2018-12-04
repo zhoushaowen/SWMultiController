@@ -29,7 +29,7 @@
     [self.multiController associateSubViewController:self withScrollView:_tableView];
     [self.view addSubview:_tableView];
     _tableView.mj_header = [MJRefreshNormalHeader headerWithRefreshingTarget:self refreshingAction:@selector(refresh)];
-    [_tableView.mj_header beginRefreshing];
+//    [_tableView.mj_header beginRefreshing];
 }
 
 - (void)refresh {
@@ -65,7 +65,9 @@
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
+    if([self.multiController indexOfSubController:self] == 0)
     return 30;
+    return 0;
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
@@ -95,6 +97,8 @@
 
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
 }
+
+
 
 
 @end

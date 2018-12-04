@@ -43,14 +43,14 @@
     vc.view.autoresizingMask = UIViewAutoresizingFlexibleHeight|UIViewAutoresizingFlexibleWidth;
     [self.view addSubview:vc.view];
     [vc didMoveToParentViewController:self];
-    [vc selectedIndex:1];
+//    [vc selectedIndex:1];
 }
 
 - (void)viewWillLayoutSubviews {
     [super viewWillLayoutSubviews];
     _multiController.view.frame = self.view.bounds;
 //    if (@available(iOS 11.0, *)) {
-//        _multiController.view.frame = CGRectMake(0, self.view.safeAreaInsets.top, self.view.bounds.size.width, self.view.bounds.size.height - self.view.safeAreaInsets.top - self.view.safeAreaInsets.bottom);
+//        _multiController.view.frame = CGRectMake(0, self.view.safeAreaInsets.top, self.view.bounds.size.width, self.view.bounds.size.height - self.view.safeAreaInsets.top - self.view.safeAreaInsets.bottom - 500);
 //    } else {
 //        _multiController.view.frame = CGRectMake(0, 64, self.view.bounds.size.width, self.view.bounds.size.height - 64);
 //    }

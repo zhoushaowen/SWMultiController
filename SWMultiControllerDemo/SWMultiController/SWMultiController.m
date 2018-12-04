@@ -617,6 +617,11 @@
         CGPoint offset = scrollView.contentOffset;
         offset.y = - CGRectGetMaxY(self.topTitleView.frame);
         scrollView.contentOffset = offset;
+        CGSize size = scrollView.contentSize;
+        if(size.height < scrollView.bounds.size.height){
+            size.height = scrollView.bounds.size.height;
+            scrollView.contentSize = size;
+        }
         self.shouldIgnoreSubVCContentOffset = NO;
     }else{
         scrollView.contentInset = UIEdgeInsetsZero;
@@ -626,6 +631,14 @@
 
 - (UIScrollView *)sw_getAssociatedScrollViewWithSubViewController:(UIViewController *)subViewController {
     return objc_getAssociatedObject(subViewController, @selector(sw_getAssociatedScrollViewWithSubViewController:));
+}
+
+- (NSInteger)sw_getAssociatedScrollViewDidScrollMethodCallbackCount:(UIScrollView *)scrollView {
+    return [objc_getAssociatedObject(scrollView, @selector(sw_getAssociatedScrollViewDidScrollMethodCallbackCount:)) integerValue];
+}
+
+- (void)sw_setAssociatedScrollView:(UIScrollView *)scrollView didScrollMethodCallbackCount:(NSInteger)count {
+    objc_setAssociatedObject(scrollView, @selector(sw_getAssociatedScrollViewDidScrollMethodCallbackCount:), @(count), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 #pragma mark - Public
@@ -701,7 +714,18 @@
     if(self.multiControllerHeaderView == nil) return;
     UIScrollView *associatedScroll = [self sw_getAssociatedScrollViewWithSubViewController:subViewController];
     if(associatedScroll == nil) return;
+    
+    NSInteger count = [self sw_getAssociatedScrollViewDidScrollMethodCallbackCount:scrollView];
+    count++;
+    [self sw_setAssociatedScrollView:scrollView didScrollMethodCallbackCount:count];
+    //忽略系统的一些触发
+    if(count < 5){
+        [self updateSubViewControllerScrollViewContentOffset:scrollView];
+        return;
+    }
+    
     if(scrollView.contentOffset.y < - (self.multiControllerHeaderView.bounds.size.height + [self topTitleViewHeight])){
+        //固定住multiControllerHeaderView和topTitleView scrollView滑动到最下面了就不要跟随移动了
         CGRect multiControllerHeaderViewFrame = self.multiControllerHeaderView.frame;
         multiControllerHeaderViewFrame.origin.y = 0;
         self.multiControllerHeaderView.frame = multiControllerHeaderViewFrame;
@@ -714,10 +738,12 @@
     multiControllerHeaderViewFrame.origin.y = - (scrollView.contentOffset.y + multiControllerHeaderViewFrame.size.height + [self topTitleViewHeight]);
     self.multiControllerHeaderView.frame = multiControllerHeaderViewFrame;
     if(scrollView.contentOffset.y <= - [self topTitleViewHeight] - self.topTitleViewFloatOffsetY){
+        //让topTitleView跟随scrollView滑动
         CGRect topTitleViewFrame = self.topTitleView.frame;
         topTitleViewFrame.origin.y = - (scrollView.contentOffset.y + [self topTitleViewHeight]);
         self.topTitleView.frame = topTitleViewFrame;
     }else{
+        //固定topTitleView位置
         CGRect topTitleViewFrame = self.topTitleView.frame;
         topTitleViewFrame.origin.y = self.topTitleViewFloatOffsetY;
         self.topTitleView.frame = topTitleViewFrame;
@@ -728,6 +754,7 @@
     if(self.multiControllerHeaderView == nil) return;
     NSAssert([self sw_getAssociatedScrollViewWithSubViewController:subViewController] == nil, @"同一个subViewController不要关联多次");
     objc_setAssociatedObject(subViewController, @selector(sw_getAssociatedScrollViewWithSubViewController:), scrollView, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    //对topTitleView的frame变化添加监听
     [self.topTitleView addObserver:self.observer forKeyPath:@"frame" options:NSKeyValueObservingOptionInitial|NSKeyValueObservingOptionNew context:(__bridge void * _Nullable)(subViewController)];
     objc_setAssociatedObject(self.topTitleView, @selector(topTitleView), @(YES), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     if (@available(iOS 11.0, *)) {
