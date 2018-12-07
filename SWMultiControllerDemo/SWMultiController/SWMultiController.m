@@ -30,6 +30,7 @@
 @property (nonatomic) BOOL sw_isViewDidAppeared;
 @property (nonatomic) SWMultiControllerObserver *observer;
 @property (nonatomic) CGFloat tmpTitleBottomViewWidth;
+@property (nonatomic,strong) NSValue *lastContentOffset;
 
 - (UIScrollView *)sw_getAssociatedScrollViewWithSubViewController:(UIViewController *)subViewController;
 
@@ -215,9 +216,15 @@
 - (void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
     //    NSLog(@"%s",__func__);
-    [self.childViewControllers enumerateObjectsUsingBlock:^(__kindof UIViewController * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-        [obj beginAppearanceTransition:YES animated:animated];
+    [self.childViewControllers enumerateObjectsUsingBlock:^(__kindof UIViewController * _Nonnull subViewController, NSUInteger idx, BOOL * _Nonnull stop) {
+        [subViewController beginAppearanceTransition:YES animated:animated];
     }];
+    //还原上次的contentOffset
+    if(self.lastContentOffset){
+        UIViewController *currentVC = self.subViewControllers[self.selectedIndex];
+        UIScrollView *associatedScroll = [self sw_getAssociatedScrollViewWithSubViewController:currentVC];
+        [self subViewController:currentVC scrollViewDidScroll:associatedScroll];
+    }
 }
 
 - (void)viewDidAppear:(BOOL)animated {
@@ -235,6 +242,11 @@
     [self.childViewControllers enumerateObjectsUsingBlock:^(__kindof UIViewController * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
         [obj beginAppearanceTransition:NO animated:animated];
     }];
+    //当前页面在被push之后,在某些机型上scrollView的contentOffset会发生改变
+    //记住之前的contentOffset
+    UIViewController *currentVC = self.subViewControllers[self.selectedIndex];
+    UIScrollView *associatedScroll = [self sw_getAssociatedScrollViewWithSubViewController:currentVC];
+    _lastContentOffset = [NSValue valueWithCGPoint:associatedScroll.contentOffset];
 }
 
 - (void)viewDidDisappear:(BOOL)animated {
@@ -612,16 +624,17 @@
 - (void)updateSubViewControllerScrollViewContentOffset:(UIScrollView *)scrollView {
     if(self.multiControllerHeaderView){
         self.shouldIgnoreSubVCContentOffset = YES;
-        scrollView.contentInset = UIEdgeInsetsMake(self.multiControllerHeaderView.bounds.size.height + [self topTitleViewHeight], 0, 0, 0);
+        //        scrollView.contentInset = UIEdgeInsetsMake(self.multiControllerHeaderView.bounds.size.height + [self topTitleViewHeight], 0, 0, 0);
+        scrollView.contentInset = UIEdgeInsetsMake([self topTitleViewHeight]+self.topTitleViewFloatOffsetY, 0, 0, 0);
         scrollView.scrollIndicatorInsets = scrollView.contentInset;
-        CGPoint offset = scrollView.contentOffset;
-        offset.y = - CGRectGetMaxY(self.topTitleView.frame);
-        scrollView.contentOffset = offset;
         CGSize size = scrollView.contentSize;
         if(size.height < scrollView.bounds.size.height){
             size.height = scrollView.bounds.size.height;
             scrollView.contentSize = size;
         }
+        CGPoint offset = scrollView.contentOffset;
+        offset.y = - CGRectGetMaxY(self.topTitleView.frame);
+        scrollView.contentOffset = offset;
         self.shouldIgnoreSubVCContentOffset = NO;
     }else{
         scrollView.contentInset = UIEdgeInsetsZero;
@@ -633,13 +646,13 @@
     return objc_getAssociatedObject(subViewController, @selector(sw_getAssociatedScrollViewWithSubViewController:));
 }
 
-- (NSInteger)sw_getAssociatedScrollViewDidScrollMethodCallbackCount:(UIScrollView *)scrollView {
-    return [objc_getAssociatedObject(scrollView, @selector(sw_getAssociatedScrollViewDidScrollMethodCallbackCount:)) integerValue];
-}
+//- (NSInteger)sw_getAssociatedScrollViewDidScrollMethodCallbackCount:(UIScrollView *)scrollView {
+//    return [objc_getAssociatedObject(scrollView, @selector(sw_getAssociatedScrollViewDidScrollMethodCallbackCount:)) integerValue];
+//}
 
-- (void)sw_setAssociatedScrollView:(UIScrollView *)scrollView didScrollMethodCallbackCount:(NSInteger)count {
-    objc_setAssociatedObject(scrollView, @selector(sw_getAssociatedScrollViewDidScrollMethodCallbackCount:), @(count), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-}
+//- (void)sw_setAssociatedScrollView:(UIScrollView *)scrollView didScrollMethodCallbackCount:(NSInteger)count {
+//    objc_setAssociatedObject(scrollView, @selector(sw_getAssociatedScrollViewDidScrollMethodCallbackCount:), @(count), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+//}
 
 #pragma mark - Public
 - (void)selectedIndex:(NSInteger)index {
@@ -715,14 +728,14 @@
     UIScrollView *associatedScroll = [self sw_getAssociatedScrollViewWithSubViewController:subViewController];
     if(associatedScroll == nil) return;
     
-    NSInteger count = [self sw_getAssociatedScrollViewDidScrollMethodCallbackCount:scrollView];
-    count++;
-    [self sw_setAssociatedScrollView:scrollView didScrollMethodCallbackCount:count];
+//    NSInteger count = [self sw_getAssociatedScrollViewDidScrollMethodCallbackCount:scrollView];
+//    count++;
+//    [self sw_setAssociatedScrollView:scrollView didScrollMethodCallbackCount:count];
     //忽略系统的一些触发
-    if(count < 5){
-        [self updateSubViewControllerScrollViewContentOffset:scrollView];
-        return;
-    }
+    //    if(count < 5){
+    //        [self updateSubViewControllerScrollViewContentOffset:scrollView];
+    //        return;
+    //    }
     
     if(scrollView.contentOffset.y < - (self.multiControllerHeaderView.bounds.size.height + [self topTitleViewHeight])){
         //固定住multiControllerHeaderView和topTitleView scrollView滑动到最下面了就不要跟随移动了
@@ -742,11 +755,17 @@
         CGRect topTitleViewFrame = self.topTitleView.frame;
         topTitleViewFrame.origin.y = - (scrollView.contentOffset.y + [self topTitleViewHeight]);
         self.topTitleView.frame = topTitleViewFrame;
+        self.shouldIgnoreContentOffset = YES;
+        scrollView.contentInset = UIEdgeInsetsMake(self.multiControllerHeaderView.bounds.size.height + [self topTitleViewHeight], 0, 0, 0);
+        self.shouldIgnoreContentOffset = NO;
     }else{
         //固定topTitleView位置
         CGRect topTitleViewFrame = self.topTitleView.frame;
         topTitleViewFrame.origin.y = self.topTitleViewFloatOffsetY;
         self.topTitleView.frame = topTitleViewFrame;
+        self.shouldIgnoreContentOffset = YES;
+        scrollView.contentInset = UIEdgeInsetsMake([self topTitleViewHeight]+self.topTitleViewFloatOffsetY, 0, 0, 0);
+        self.shouldIgnoreContentOffset = NO;
     }
 }
 
@@ -765,7 +784,7 @@
     //bug fix
     //在subViewController刚刚viewDidLoad的时候,改变UIScrollView的contentOffset,会被重置,所以延时执行解决这个问题
     scrollView.hidden = YES;
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.2 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
         scrollView.hidden = NO;
         [self updateSubViewControllerScrollViewContentOffset:scrollView];
     });
