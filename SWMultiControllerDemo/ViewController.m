@@ -30,8 +30,8 @@
             subVC.title = [NSString stringWithFormat:@"第%d个标题",i];
             [mutableArr addObject:subVC];
         }else{
-//            CollectionViewController *subVC = [[CollectionViewController alloc] init];
-            SubViewController *subVC = [SubViewController new];
+            CollectionViewController *subVC = [[CollectionViewController alloc] init];
+//            SubViewController *subVC = [SubViewController new];
             subVC.title = [NSString stringWithFormat:@"加大标题长度第%d个标题",i];
             [mutableArr addObject:subVC];
         }

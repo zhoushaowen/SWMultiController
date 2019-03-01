@@ -19,7 +19,7 @@ Pod::Spec.new do |s|
   s.source_files  = "SWMultiControllerDemo/SWMultiController/*.{h,m}"
 
   s.dependency 'ReactiveObjC'
-  s.dependency 'MJReresh'
+  s.dependency 'MJRefresh'
   
   s.requires_arc = true
 

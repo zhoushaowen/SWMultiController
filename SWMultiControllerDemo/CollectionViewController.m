@@ -62,6 +62,10 @@
     return CGSizeMake(100, 100);
 }
 
+- (void)dealloc {
+    NSLog(@"%s",__func__);
+}
+
 
 
 

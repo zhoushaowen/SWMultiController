@@ -82,7 +82,9 @@
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
 }
 
-
+- (void)dealloc {
+    NSLog(@"%s",__func__);
+}
 
 
 @end
