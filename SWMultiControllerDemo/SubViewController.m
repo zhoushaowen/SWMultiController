@@ -23,6 +23,8 @@
     self.view.backgroundColor = [UIColor whiteColor];
     _tableView = [[UITableView alloc] initWithFrame:self.view.bounds style:UITableViewStylePlain];
     _tableView.autoresizingMask = UIViewAutoresizingFlexibleHeight|UIViewAutoresizingFlexibleWidth;
+//    _tableView.contentInset = UIEdgeInsetsMake(64, 0, 0, 0);
+//    _tableView.scrollIndicatorInsets = _tableView.contentInset;
     _tableView.delegate = self;
     _tableView.dataSource = self;
 //    _tableView.backgroundColor = [UIColor colorWithRed:arc4random_uniform(256)/255.0f green:arc4random_uniform(256)/255.0f blue:arc4random_uniform(256)/255.0f alpha:1.0];
@@ -32,42 +34,24 @@
 //    [_tableView.mj_header beginRefreshing];
 }
 
+- (void)viewWillLayoutSubviews {
+    [super viewWillLayoutSubviews];
+    if (@available(iOS 11.0, *)) {
+        _tableView.frame = CGRectMake(0, self.view.safeAreaInsets.top, self.view.bounds.size.width, self.view.bounds.size.height - self.view.safeAreaInsets.top);
+    } else {
+        // Fallback on earlier versions
+    }
+}
+
 - (void)refresh {
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
         [_tableView.mj_header endRefreshing];
     });
 }
 
-- (void)viewWillAppear:(BOOL)animated {
-    [super viewWillAppear:animated];
-//    NSLog(@"%s---index:%ld",__func__,[self.multiController indexOfSubController:self]);
-}
-
-- (void)viewDidAppear:(BOOL)animated {
-    [super viewDidAppear:animated];
-//    NSLog(@"%s---index:%ld",__func__,[self.multiController indexOfSubController:self]);
-}
-
-- (void)viewWillDisappear:(BOOL)animated {
-    [super viewWillDisappear:animated];
-//    NSLog(@"%s---index:%ld",__func__,[self.multiController indexOfSubController:self]);
-}
-
-- (void)viewDidDisappear:(BOOL)animated {
-    [super viewDidDisappear:animated];
-//    NSLog(@"%s---index:%ld",__func__,[self.multiController indexOfSubController:self]);
-}
-
-- (void)scrollViewDidScroll:(UIScrollView *)scrollView {
-    if(scrollView == _tableView){
-        [self.multiController subViewController:self scrollViewDidScroll:scrollView];
-    }
-}
-
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-    if([self.multiController indexOfSubController:self] == 0)
-    return 30;
-    return 0;
+//    if([self.multiController indexOfSubController:self] == 0)
+    return arc4random_uniform(30) + 1;
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
@@ -77,9 +61,9 @@
         cell.backgroundColor = [UIColor clearColor];
     }
     if(indexPath.row % 2 == 0){
-        cell.textLabel.text = @"Present";
+        cell.textLabel.text = [NSString stringWithFormat:@"%@-Present",@(indexPath.row)];
     }else{
-        cell.textLabel.text = @"Dismiss";
+        cell.textLabel.text = [NSString stringWithFormat:@"%@-Dismiss",@(indexPath.row)];
     }
     return cell;
 }

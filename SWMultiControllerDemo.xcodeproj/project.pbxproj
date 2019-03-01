@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		36011F9920902BD000FBD5A9 /* SWMultiController.m in Sources */ = {isa = PBXBuildFile; fileRef = 36011F9720902BD000FBD5A9 /* SWMultiController.m */; };
 		36011F9E2090528C00FBD5A9 /* MyMultiController.m in Sources */ = {isa = PBXBuildFile; fileRef = 36011F9D2090528C00FBD5A9 /* MyMultiController.m */; };
+		36923FB82223883100E478BE /* CollectionViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 36923FB72223883100E478BE /* CollectionViewController.m */; };
 		36A4E10120C91DBB00C10A93 /* MyHeaderView.m in Sources */ = {isa = PBXBuildFile; fileRef = 36A4E10020C91DBB00C10A93 /* MyHeaderView.m */; };
 		36D19F0A208DA99A00E45B60 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 36D19F09208DA99A00E45B60 /* AppDelegate.m */; };
 		36D19F0D208DA99A00E45B60 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 36D19F0C208DA99A00E45B60 /* ViewController.m */; };
@@ -26,6 +27,8 @@
 		36011F9820902BD000FBD5A9 /* SWMultiController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SWMultiController.h; sourceTree = "<group>"; };
 		36011F9C2090528C00FBD5A9 /* MyMultiController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MyMultiController.h; sourceTree = "<group>"; };
 		36011F9D2090528C00FBD5A9 /* MyMultiController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MyMultiController.m; sourceTree = "<group>"; };
+		36923FB62223883100E478BE /* CollectionViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CollectionViewController.h; sourceTree = "<group>"; };
+		36923FB72223883100E478BE /* CollectionViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CollectionViewController.m; sourceTree = "<group>"; };
 		36A4E0FF20C91DBB00C10A93 /* MyHeaderView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MyHeaderView.h; sourceTree = "<group>"; };
 		36A4E10020C91DBB00C10A93 /* MyHeaderView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MyHeaderView.m; sourceTree = "<group>"; };
 		36D19F05208DA99A00E45B60 /* SWMultiControllerDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SWMultiControllerDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -95,6 +98,8 @@
 				36A4E10020C91DBB00C10A93 /* MyHeaderView.m */,
 				36D19F23208DAD2B00E45B60 /* SubViewController.h */,
 				36D19F24208DAD2B00E45B60 /* SubViewController.m */,
+				36923FB62223883100E478BE /* CollectionViewController.h */,
+				36923FB72223883100E478BE /* CollectionViewController.m */,
 				36011F9C2090528C00FBD5A9 /* MyMultiController.h */,
 				36011F9D2090528C00FBD5A9 /* MyMultiController.m */,
 				36D19F0E208DA99A00E45B60 /* Main.storyboard */,
@@ -134,7 +139,7 @@
 				36D19F01208DA99A00E45B60 /* Sources */,
 				36D19F02208DA99A00E45B60 /* Frameworks */,
 				36D19F03208DA99A00E45B60 /* Resources */,
-				8344EEA1CFD777E62DB31DE2 /* [CP] Copy Pods Resources */,
+				F08537816D2235499A17CFEE /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -209,22 +214,26 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
-		8344EEA1CFD777E62DB31DE2 /* [CP] Copy Pods Resources */ = {
+		F08537816D2235499A17CFEE /* [CP] Copy Pods Resources */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
+			inputFileListPaths = (
+			);
 			inputPaths = (
-				"${SRCROOT}/Pods/Target Support Files/Pods-SWMultiControllerDemo/Pods-SWMultiControllerDemo-resources.sh",
+				"${PODS_ROOT}/Target Support Files/Pods-SWMultiControllerDemo/Pods-SWMultiControllerDemo-resources.sh",
 				"${PODS_ROOT}/MJRefresh/MJRefresh/MJRefresh.bundle",
 			);
 			name = "[CP] Copy Pods Resources";
+			outputFileListPaths = (
+			);
 			outputPaths = (
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/MJRefresh.bundle",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-SWMultiControllerDemo/Pods-SWMultiControllerDemo-resources.sh\"\n";
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-SWMultiControllerDemo/Pods-SWMultiControllerDemo-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
@@ -234,6 +243,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				36923FB82223883100E478BE /* CollectionViewController.m in Sources */,
 				36D19F25208DAD2B00E45B60 /* SubViewController.m in Sources */,
 				36D19F0D208DA99A00E45B60 /* ViewController.m in Sources */,
 				36D19F18208DA99D00E45B60 /* main.m in Sources */,
