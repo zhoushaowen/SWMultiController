@@ -2,7 +2,7 @@ Pod::Spec.new do |s|
 
   s.name         = "SWMultiController"
 
-  s.version      = "1.1.9"
+  s.version      = "2.0.0"
 
   s.homepage      = 'https://github.com/zhoushaowen/SWMultiController'
 
@@ -17,6 +17,9 @@ Pod::Spec.new do |s|
   s.source       = { :git => "https://github.com/zhoushaowen/SWMultiController.git", :tag => s.version }
   
   s.source_files  = "SWMultiControllerDemo/SWMultiController/*.{h,m}"
+
+  s.dependency 'ReactiveObjC'
+  s.dependency 'MJReresh'
   
   s.requires_arc = true
 

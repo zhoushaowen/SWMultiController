@@ -80,26 +80,13 @@
 /**
  顶部的headerView
  如果要添加了,必须要在子控制器中调用下面两个方法
+ 设置multiControllerHeaderView之后,scrollBgView和self.view的原点一样并且等高
  */
 @property (nonatomic,strong,nullable) UIView *multiControllerHeaderView;
-
-/**
- 顶部titleView的浮动偏移量,默认是0
- */
-@property (nonatomic) CGFloat topTitleViewFloatOffsetY;
 /**
  关联自动控制器和自控制器上的scrollView
  */
 - (void)associateSubViewController:(UIViewController *)subViewController withScrollView:(UIScrollView *)scrollView;
-/**
- 子控制器的scrollView滑动的时候调用
- */
-- (void)subViewController:(UIViewController *)subViewController scrollViewDidScroll:(UIScrollView *)scrollView;
-
-/**
- 当multiControllerHeaderView的frame放生改变时,需要手动调用此方法更新布局
- */
-- (void)updateHeaderViewFrame;
 
 #pragma mark - Override
 
