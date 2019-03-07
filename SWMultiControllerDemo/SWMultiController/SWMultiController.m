@@ -94,11 +94,11 @@
 @implementation SWMultiControllerObserver
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSKeyValueChangeKey,id> *)change context:(void *)context {
-//        NSLog(@"%@------%@-------%@-----%@",object,keyPath,change,context);
+    //        NSLog(@"%@------%@-------%@-----%@",object,keyPath,change,context);
     if([keyPath isEqualToString:@"frame"]){
-//        CGRect rect = [change[NSKeyValueChangeNewKey] CGRectValue];
-//        UIViewController *subVC = (__bridge UIViewController *)(context);
-//        [self updateAssociatedScrollViewContentOffsetWithSubViewController:subVC rect:rect];
+        //        CGRect rect = [change[NSKeyValueChangeNewKey] CGRectValue];
+        //        UIViewController *subVC = (__bridge UIViewController *)(context);
+        //        [self updateAssociatedScrollViewContentOffsetWithSubViewController:subVC rect:rect];
     }else if ([keyPath isEqualToString:@"selectedIndex"]){
         NSInteger oldIndex = [change[NSKeyValueChangeOldKey] integerValue];
         NSInteger currentIndex = [change[NSKeyValueChangeNewKey] integerValue];
@@ -257,11 +257,11 @@
         [subViewController beginAppearanceTransition:YES animated:animated];
     }];
     //还原上次的contentOffset
-//    if(self.lastContentOffset){
-//        UIViewController *currentVC = self.subViewControllers[self.selectedIndex];
-//        UIScrollView *associatedScroll = [self sw_getAssociatedScrollViewWithSubViewController:currentVC];
-//        [self subViewController:currentVC scrollViewDidScroll:associatedScroll];
-//    }
+    //    if(self.lastContentOffset){
+    //        UIViewController *currentVC = self.subViewControllers[self.selectedIndex];
+    //        UIScrollView *associatedScroll = [self sw_getAssociatedScrollViewWithSubViewController:currentVC];
+    //        [self subViewController:currentVC scrollViewDidScroll:associatedScroll];
+    //    }
 }
 
 - (void)viewDidAppear:(BOOL)animated {
@@ -281,9 +281,9 @@
     }];
     //当前页面在被push之后,在某些机型上scrollView的contentOffset会发生改变
     //记住之前的contentOffset
-//    UIViewController *currentVC = self.subViewControllers[self.selectedIndex];
-//    UIScrollView *associatedScroll = [self sw_getAssociatedScrollViewWithSubViewController:currentVC];
-//    _lastContentOffset = [NSValue valueWithCGPoint:associatedScroll.contentOffset];
+    //    UIViewController *currentVC = self.subViewControllers[self.selectedIndex];
+    //    UIScrollView *associatedScroll = [self sw_getAssociatedScrollViewWithSubViewController:currentVC];
+    //    _lastContentOffset = [NSValue valueWithCGPoint:associatedScroll.contentOffset];
 }
 
 - (void)viewDidDisappear:(BOOL)animated {
@@ -385,7 +385,7 @@
 
 /**
  添加subview的view到容器上
-
+ 
  @param index 当前索引
  @return YES表示添加成功 NO表示已经添加过了
  */
@@ -732,7 +732,7 @@
     return [self.subViewControllers indexOfObject:subController];
 }
 
-- (void)reloadWithSubViewControllers:(NSArray<UIViewController *> *)subViewControllers {
+- (void)reloadWithSubViewControllers:(NSArray<UIViewController *> *)subViewControllers selectedIndex:(NSInteger)selectedIndex {
     self.initializedIndex = -1;
     [self.subViewControllers enumerateObjectsUsingBlock:^(UIViewController * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
         if(obj.parentViewController){
@@ -755,7 +755,12 @@
         }];
     }
     [self addTopTitleLabels];
-    [self selectedIndex:self.initializedIndex];
+    [self selectedIndex:selectedIndex];
+}
+
+
+- (void)reloadWithSubViewControllers:(NSArray<UIViewController *> *)subViewControllers {
+    [self reloadWithSubViewControllers:subViewControllers selectedIndex:0];
 }
 
 - (void)setHiddenTitleBottomView:(BOOL)hiddenTitleBottomView {
@@ -822,7 +827,7 @@
         scrollView.contentInsetAdjustmentBehavior = UIScrollViewContentInsetAdjustmentNever;
     } else {
         // Fallback on earlier versions
-    }    
+    }
     CGFloat height = self.multiControllerHeaderView.bounds.size.height + [self topTitleViewHeight];
     UIView *headerView = [[UIView alloc] initWithFrame:CGRectMake(0, -height, self.view.bounds.size.width, height)];
     [scrollView addSubview:headerView];
@@ -887,7 +892,7 @@
         topTitleViewFrame.origin.y = - scrollView.contentOffset.y + scrollView.frame.origin.y - [self topTitleViewHeight];
         self.topTitleView.frame = topTitleViewFrame;
     }
-
+    
 }
 
 //同步所有scrollView的contentOffset
@@ -929,19 +934,20 @@
 - (void)dealloc {
     NSLog(@"%s",__func__);
     [self removeObserver:self.observer forKeyPath:@"selectedIndex"];
-//    @try {
-//        if([objc_getAssociatedObject(self.topTitleView, @selector(topTitleView)) boolValue]){
-//            //移除所有包含context的通知
-//            [self.topTitleView removeObserver:self.observer forKeyPath:@"frame"];
-//        }
-//    } @catch (NSException *exception) {
-//        NSLog(@"removeObserverException:%@",exception);
-//    } @finally {
-//
-//    }
+    //    @try {
+    //        if([objc_getAssociatedObject(self.topTitleView, @selector(topTitleView)) boolValue]){
+    //            //移除所有包含context的通知
+    //            [self.topTitleView removeObserver:self.observer forKeyPath:@"frame"];
+    //        }
+    //    } @catch (NSException *exception) {
+    //        NSLog(@"removeObserverException:%@",exception);
+    //    } @finally {
+    //
+    //    }
 }
 
 
 @end
+
 
 

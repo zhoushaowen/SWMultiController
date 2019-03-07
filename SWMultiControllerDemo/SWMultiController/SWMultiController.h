@@ -30,9 +30,17 @@
 /**
  刷新控制器当中的子控制器,刷新之后默认会选中index 0
  
- @param subViewControllers 自控制器
+ @param subViewControllers 子控制器
  */
 - (void)reloadWithSubViewControllers:(NSArray<UIViewController *> *)subViewControllers;
+
+/**
+ 刷新控制器当中的子控制器,刷新之后默认会选中selectedIndex
+ 
+ @param subViewControllers 子控制器
+ @param selectedIndex 选择的索引
+ */
+- (void)reloadWithSubViewControllers:(NSArray<UIViewController *> *)subViewControllers selectedIndex:(NSInteger)selectedIndex;
 /**
  选中了某个控制器的回调
  */
@@ -187,4 +195,5 @@
 
 
 @end
+
 
