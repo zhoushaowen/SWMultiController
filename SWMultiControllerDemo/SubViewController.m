@@ -78,7 +78,6 @@
             [self dismissViewControllerAnimated:YES completion:nil];
         }
     }
-
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
 }
 

@@ -226,6 +226,10 @@
     [self selectedIndex:self.initializedIndex];
 }
 
+//- (NSUInteger)selectedIndex {
+//    return _selectedIndex;
+//}
+
 - (void)viewWillLayoutSubviews {
     [super viewWillLayoutSubviews];
     if(_flag) return;
@@ -732,7 +736,7 @@
     return [self.subViewControllers indexOfObject:subController];
 }
 
-- (void)reloadWithSubViewControllers:(NSArray<UIViewController *> *)subViewControllers selectedIndex:(NSInteger)selectedIndex {
+- (void)reloadWithSubViewControllers:(NSArray<UIViewController *> *)subViewControllers selectedIndex:(NSUInteger)selectedIndex {
     self.initializedIndex = -1;
     [self.subViewControllers enumerateObjectsUsingBlock:^(UIViewController * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
         if(obj.parentViewController){
@@ -755,7 +759,7 @@
         }];
     }
     [self addTopTitleLabels];
-    [self selectedIndex:selectedIndex];
+    [self selectedIndex:selectedIndex <= 0 ? -1:selectedIndex];
 }
 
 

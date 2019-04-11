@@ -16,12 +16,14 @@
 
 @end
 
+NS_ASSUME_NONNULL_BEGIN
+
 @interface SWMultiController : UIViewController<UIScrollViewDelegate,UIGestureRecognizerDelegate>
 
 /**
  初始化方法
  
- @param subControllers 自控制器
+ @param subControllers 子控制器
  @return SWMultiController
  */
 - (instancetype)initWithSubControllers:(NSArray<UIViewController *> *)subControllers NS_DESIGNATED_INITIALIZER;
@@ -40,7 +42,7 @@
  @param subViewControllers 子控制器
  @param selectedIndex 选择的索引
  */
-- (void)reloadWithSubViewControllers:(NSArray<UIViewController *> *)subViewControllers selectedIndex:(NSInteger)selectedIndex;
+- (void)reloadWithSubViewControllers:(NSArray<UIViewController *> *)subViewControllers selectedIndex:(NSUInteger)selectedIndex;
 /**
  选中了某个控制器的回调
  */
@@ -75,6 +77,13 @@
  @param index 索引
  */
 - (void)selectedIndex:(NSInteger)index;
+
+/**
+ 当前控制器的索引
+
+ @return 索引
+ */
+- (NSUInteger)selectedIndex;
 
 /**
  获取某个子控制器在当前多控制器当中的索引
@@ -195,5 +204,8 @@
 
 
 @end
+
+NS_ASSUME_NONNULL_END
+
 
 
