@@ -412,9 +412,6 @@
 }
 
 - (CGFloat)horizontalSpaceOfTitleLabel {
-    if(self.shouldSpaceAround){
-        return self.space;
-    }
     return 25;
 }
 
@@ -443,16 +440,10 @@
 }
 
 - (CGFloat)topTitleViewLeftLabelInset {
-    if(self.shouldSpaceAround){
-        return self.space/2.0;
-    }
     return 20;
 }
 
 - (CGFloat)topTitleViewRightLabelInset {
-    if(self.shouldSpaceAround){
-        return self.space/2.0;
-    }
     return 20;
 }
 
@@ -493,7 +484,7 @@
     [self updateTopTitleScrollViewContentSize];
     [self changeTitleBottomViewWithCurrentIndex:currentIndex percent:percent currentLabel:currentLabel nextLabel:nextLabel];
     if(contentOffset.x > (self.subViewControllers.count - 2) * scrollView.bounds.size.width ){//当前快滑动到最后一个index的时候,先更新topTitleScrollView的contentSize
-        CGFloat totalWidth = [self topTitleViewLeftLabelInset];
+        CGFloat totalWidth = self.shouldSpaceAround?(self.space/2.0): [self topTitleViewLeftLabelInset];
         for (int i=0; i<self.subViewControllers.count; i++) {
             UILabel *label = [self.topTitleScrollView viewWithTag:i+100];
             CGFloat width = 0;
@@ -509,9 +500,9 @@
             }
             width = [tmpLabel sizeThatFits:CGSizeMake(MAXFLOAT, [self topTitleViewHeight])].width;
             if(i == self.subViewControllers.count - 1){
-                totalWidth += width + [self topTitleViewRightLabelInset];
+                totalWidth += width + (self.shouldSpaceAround?(self.space/2.0): [self topTitleViewRightLabelInset]);
             }else{
-                totalWidth += width + [self horizontalSpaceOfTitleLabel];
+                totalWidth += width + (self.shouldSpaceAround?self.space:[self horizontalSpaceOfTitleLabel]);
             }
         }
         if(totalWidth < self.topTitleScrollView.bounds.size.width){
@@ -595,10 +586,10 @@
         CGFloat width = 0;
         if(i == (currentIndex + 1)){//如果是最后一个label,只需计算出label长度的一半
             width = [label sizeThatFits:CGSizeMake(MAXFLOAT, [self topTitleViewHeight])].width/2.0f;
-            nextLabelCenterX += width + [self topTitleViewRightLabelInset];
+            nextLabelCenterX += width + (self.shouldSpaceAround?(self.space/2.0): [self topTitleViewRightLabelInset]);
         }else{
             width = [label sizeThatFits:CGSizeMake(MAXFLOAT, [self topTitleViewHeight])].width;
-            nextLabelCenterX += width + [self horizontalSpaceOfTitleLabel];
+            nextLabelCenterX += width + (self.shouldSpaceAround?self.space:[self horizontalSpaceOfTitleLabel]);
         }
     }
     CGFloat centerXOffset = nextLabelCenterX - CGRectGetMidX(currentLabel.frame);
@@ -615,29 +606,17 @@
 }
 
 - (void)updateTopTitleScrollViewContentSize {
-    CGFloat totalWidth = [self topTitleViewLeftLabelInset];
+    CGFloat totalWidth = self.shouldSpaceAround?(self.space/2.0): [self topTitleViewLeftLabelInset];
     for(int i=0;i<self.subViewControllers.count;i++){
         UILabel *label = [self.topTitleScrollView viewWithTag:i + 100];
         CGSize size = [label sizeThatFits:CGSizeMake(MAXFLOAT, [self topTitleViewHeight])];
         label.frame = CGRectMake(totalWidth, 0, size.width, [self topTitleViewHeight]);
         if(i == self.subViewControllers.count - 1){
-            totalWidth += size.width + [self topTitleViewRightLabelInset];
+            totalWidth += size.width + (self.shouldSpaceAround?(self.space/2.0): [self topTitleViewRightLabelInset]);
         }else{
-            totalWidth += size.width + [self horizontalSpaceOfTitleLabel];
+            totalWidth += size.width + (self.shouldSpaceAround ? self.space : [self horizontalSpaceOfTitleLabel]);
         }
     }
-//    if(self.shouldSpaceAround){
-//        CGFloat allLabelWidth = totalWidth - [self topTitleViewLeftLabelInset] - [self topTitleViewRightLabelInset] - (self.subViewControllers.count - 1)*[self horizontalSpaceOfTitleLabel];
-//        CGFloat space = (self.topTitleScrollView.bounds.size.width - allLabelWidth)*1.0/self.subViewControllers.count;
-//        CGFloat allWidth = space/2.0;
-//        for(int i=0;i<self.subViewControllers.count;i++){
-//            UILabel *label = (UILabel *)[self.topTitleScrollView viewWithTag:i+100];
-//            CGRect rect = label.frame;
-//            rect.origin.x = allWidth;
-//            label.frame = rect;
-//            allWidth += space + rect.size.width;
-//        }
-//    }
     if(totalWidth < self.topTitleScrollView.bounds.size.width){
         totalWidth = self.topTitleScrollView.bounds.size.width;
     }
