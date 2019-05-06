@@ -60,23 +60,13 @@
         cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"cell"];
         cell.backgroundColor = [UIColor clearColor];
     }
-    if(indexPath.row % 2 == 0){
-        cell.textLabel.text = [NSString stringWithFormat:@"%@-Present",@(indexPath.row)];
-    }else{
-        cell.textLabel.text = [NSString stringWithFormat:@"%@-Dismiss",@(indexPath.row)];
-    }
+    cell.textLabel.text = [NSString stringWithFormat:@"%@-Dismiss",@(indexPath.row)];
     return cell;
 }
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
-    if(indexPath.row % 2 == 0){
-        UIStoryboard *storyboard = [UIStoryboard storyboardWithName:@"Main" bundle:nil];
-        UIViewController *vc = [storyboard instantiateViewControllerWithIdentifier:@"multi"];
-        [self presentViewController:vc animated:YES completion:nil];
-    }else{
-        if(self.presentingViewController){
-            [self dismissViewControllerAnimated:YES completion:nil];
-        }
+    if(self.presentingViewController){
+        [self dismissViewControllerAnimated:YES completion:nil];
     }
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
 }

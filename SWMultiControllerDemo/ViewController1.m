@@ -6,23 +6,24 @@
 //  Copyright © 2018年 zhoushaowen. All rights reserved.
 //
 
-#import "ViewController.h"
+#import "ViewController1.h"
 #import "SubViewController.h"
 #import "SWMultiController.h"
 #import "CollectionViewController.h"
 #import "MyHeaderView.h"
 
-@interface ViewController ()
+@interface ViewController1 ()
 {
     SWMultiController *_multiController;
 }
 
 @end
 
-@implementation ViewController
+@implementation ViewController1
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    self.view.backgroundColor = [UIColor whiteColor];
     NSMutableArray *mutableArr = [NSMutableArray arrayWithCapacity:0];
     for (int i=0; i<10; i++) {
         if(i%2 == 0){

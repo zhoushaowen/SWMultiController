@@ -9,10 +9,12 @@
 /* Begin PBXBuildFile section */
 		36011F9920902BD000FBD5A9 /* SWMultiController.m in Sources */ = {isa = PBXBuildFile; fileRef = 36011F9720902BD000FBD5A9 /* SWMultiController.m */; };
 		36011F9E2090528C00FBD5A9 /* MyMultiController.m in Sources */ = {isa = PBXBuildFile; fileRef = 36011F9D2090528C00FBD5A9 /* MyMultiController.m */; };
+		368EED38228002DB00BD9F51 /* MainViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 368EED37228002DB00BD9F51 /* MainViewController.m */; };
+		368EED3E2280065900BD9F51 /* ViewController2.m in Sources */ = {isa = PBXBuildFile; fileRef = 368EED3D2280065900BD9F51 /* ViewController2.m */; };
 		36923FB82223883100E478BE /* CollectionViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 36923FB72223883100E478BE /* CollectionViewController.m */; };
 		36A4E10120C91DBB00C10A93 /* MyHeaderView.m in Sources */ = {isa = PBXBuildFile; fileRef = 36A4E10020C91DBB00C10A93 /* MyHeaderView.m */; };
 		36D19F0A208DA99A00E45B60 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 36D19F09208DA99A00E45B60 /* AppDelegate.m */; };
-		36D19F0D208DA99A00E45B60 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 36D19F0C208DA99A00E45B60 /* ViewController.m */; };
+		36D19F0D208DA99A00E45B60 /* ViewController1.m in Sources */ = {isa = PBXBuildFile; fileRef = 36D19F0C208DA99A00E45B60 /* ViewController1.m */; };
 		36D19F10208DA99A00E45B60 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 36D19F0E208DA99A00E45B60 /* Main.storyboard */; };
 		36D19F12208DA99D00E45B60 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 36D19F11208DA99D00E45B60 /* Assets.xcassets */; };
 		36D19F15208DA99D00E45B60 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 36D19F13208DA99D00E45B60 /* LaunchScreen.storyboard */; };
@@ -27,6 +29,10 @@
 		36011F9820902BD000FBD5A9 /* SWMultiController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SWMultiController.h; sourceTree = "<group>"; };
 		36011F9C2090528C00FBD5A9 /* MyMultiController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MyMultiController.h; sourceTree = "<group>"; };
 		36011F9D2090528C00FBD5A9 /* MyMultiController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MyMultiController.m; sourceTree = "<group>"; };
+		368EED36228002DB00BD9F51 /* MainViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MainViewController.h; sourceTree = "<group>"; };
+		368EED37228002DB00BD9F51 /* MainViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MainViewController.m; sourceTree = "<group>"; };
+		368EED3C2280065900BD9F51 /* ViewController2.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ViewController2.h; sourceTree = "<group>"; };
+		368EED3D2280065900BD9F51 /* ViewController2.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ViewController2.m; sourceTree = "<group>"; };
 		36923FB62223883100E478BE /* CollectionViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CollectionViewController.h; sourceTree = "<group>"; };
 		36923FB72223883100E478BE /* CollectionViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CollectionViewController.m; sourceTree = "<group>"; };
 		36A4E0FF20C91DBB00C10A93 /* MyHeaderView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MyHeaderView.h; sourceTree = "<group>"; };
@@ -34,8 +40,8 @@
 		36D19F05208DA99A00E45B60 /* SWMultiControllerDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SWMultiControllerDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		36D19F08208DA99A00E45B60 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		36D19F09208DA99A00E45B60 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
-		36D19F0B208DA99A00E45B60 /* ViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ViewController.h; sourceTree = "<group>"; };
-		36D19F0C208DA99A00E45B60 /* ViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ViewController.m; sourceTree = "<group>"; };
+		36D19F0B208DA99A00E45B60 /* ViewController1.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ViewController1.h; sourceTree = "<group>"; };
+		36D19F0C208DA99A00E45B60 /* ViewController1.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ViewController1.m; sourceTree = "<group>"; };
 		36D19F0F208DA99A00E45B60 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		36D19F11208DA99D00E45B60 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		36D19F14208DA99D00E45B60 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
@@ -92,8 +98,12 @@
 				36011F9620902BD000FBD5A9 /* SWMultiController */,
 				36D19F08208DA99A00E45B60 /* AppDelegate.h */,
 				36D19F09208DA99A00E45B60 /* AppDelegate.m */,
-				36D19F0B208DA99A00E45B60 /* ViewController.h */,
-				36D19F0C208DA99A00E45B60 /* ViewController.m */,
+				368EED36228002DB00BD9F51 /* MainViewController.h */,
+				368EED37228002DB00BD9F51 /* MainViewController.m */,
+				36D19F0B208DA99A00E45B60 /* ViewController1.h */,
+				36D19F0C208DA99A00E45B60 /* ViewController1.m */,
+				368EED3C2280065900BD9F51 /* ViewController2.h */,
+				368EED3D2280065900BD9F51 /* ViewController2.m */,
 				36A4E0FF20C91DBB00C10A93 /* MyHeaderView.h */,
 				36A4E10020C91DBB00C10A93 /* MyHeaderView.m */,
 				36D19F23208DAD2B00E45B60 /* SubViewController.h */,
@@ -245,10 +255,12 @@
 			files = (
 				36923FB82223883100E478BE /* CollectionViewController.m in Sources */,
 				36D19F25208DAD2B00E45B60 /* SubViewController.m in Sources */,
-				36D19F0D208DA99A00E45B60 /* ViewController.m in Sources */,
+				36D19F0D208DA99A00E45B60 /* ViewController1.m in Sources */,
 				36D19F18208DA99D00E45B60 /* main.m in Sources */,
+				368EED38228002DB00BD9F51 /* MainViewController.m in Sources */,
 				36A4E10120C91DBB00C10A93 /* MyHeaderView.m in Sources */,
 				36D19F0A208DA99A00E45B60 /* AppDelegate.m in Sources */,
+				368EED3E2280065900BD9F51 /* ViewController2.m in Sources */,
 				36011F9920902BD000FBD5A9 /* SWMultiController.m in Sources */,
 				36011F9E2090528C00FBD5A9 /* MyMultiController.m in Sources */,
 			);

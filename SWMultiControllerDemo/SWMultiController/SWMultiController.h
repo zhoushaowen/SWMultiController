@@ -108,6 +108,12 @@ NS_ASSUME_NONNULL_BEGIN
 #pragma mark - Override
 
 /**
+ 当titleLabel的个数比较少的时候,无法全部横向铺满屏幕的时候,那么就均等间隔排列每个titleLabel;默认值是YES;
+ (也就是说每个titleLabel两侧的间隔相等,titleLabel之间的间隔比titleLabel与边框的间隔大一倍。)
+ 此时将会忽略horizontalSpaceOfTitleLabel、topTitleViewLeftLabelInset、topTitleViewRightLabelInset的值;
+ */
+- (BOOL)shouldLayoutTitleLabelSpaceAround;
+/**
  是否允许动态改变标题底部横线视图的宽度,默认是YES;
  如果不想随着scrollView的滑动动态改变,那么需要重写此方法返回NO,并且实现titleBottomViewWidth方法,返回一个固定的高度;
  */
@@ -134,7 +140,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (CGFloat)topTitleViewRightLabelInset;
 
 /**
- 标题之间的水平间距
+ 标题之间的水平间距,默认值40
  可以重写此方法,进行自定义
  */
 

@@ -13,45 +13,6 @@
 #import <ReactiveObjC.h>
 #import <MJRefresh.h>
 
-//@interface UIViewController (SWMultiControllerSubControllerExtension)
-//
-//@property (nonatomic,strong) void(^SWMultiController_viewWillLayoutSubviewsBlock)(UIViewController *vc);
-//
-//@end
-//
-//@implementation UIViewController (SWMultiControllerSubControllerExtension)
-//
-//+ (void)load {
-//    static dispatch_once_t onceToken;
-//    dispatch_once(&onceToken, ^{
-//        Method sysM = class_getInstanceMethod([self class], @selector(viewWillLayoutSubviews));
-//        Method cusM = class_getInstanceMethod([self class], @selector(SWMultiController_viewWillLayoutSubviews));
-//        if(class_addMethod([self class], @selector(viewWillLayoutSubviews), method_getImplementation(cusM), method_getTypeEncoding(cusM))){
-//            class_replaceMethod([self class], @selector(SWMultiController_viewWillLayoutSubviews), method_getImplementation(sysM), method_getTypeEncoding(sysM));
-//        }else{
-//            method_exchangeImplementations(sysM, cusM);
-//        }
-//    });
-//}
-//
-//- (void)SWMultiController_viewWillLayoutSubviews {
-//    [self SWMultiController_viewWillLayoutSubviews];
-//    if(self.SWMultiController_viewWillLayoutSubviewsBlock){
-//        self.SWMultiController_viewWillLayoutSubviewsBlock(self);
-//    }
-//}
-//
-//
-//- (void)setSWMultiController_viewWillLayoutSubviewsBlock:(void (^)(UIViewController *))SWMultiController_viewWillLayoutSubviewsBlock {
-//    objc_setAssociatedObject(self, @selector(SWMultiController_viewWillLayoutSubviewsBlock), SWMultiController_viewWillLayoutSubviewsBlock, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-//}
-//
-//- (void (^)(UIViewController *))SWMultiController_viewWillLayoutSubviewsBlock {
-//    return objc_getAssociatedObject(self, @selector(SWMultiController_viewWillLayoutSubviewsBlock));
-//}
-//
-//@end
-
 @interface SWMultiControllerObserver : NSObject
 
 @property (nonatomic,weak) SWMultiController *multiController;
@@ -95,11 +56,12 @@
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSKeyValueChangeKey,id> *)change context:(void *)context {
     //        NSLog(@"%@------%@-------%@-----%@",object,keyPath,change,context);
-    if([keyPath isEqualToString:@"frame"]){
+//    if([keyPath isEqualToString:@"frame"]){
         //        CGRect rect = [change[NSKeyValueChangeNewKey] CGRectValue];
         //        UIViewController *subVC = (__bridge UIViewController *)(context);
         //        [self updateAssociatedScrollViewContentOffsetWithSubViewController:subVC rect:rect];
-    }else if ([keyPath isEqualToString:@"selectedIndex"]){
+//    }else
+        if ([keyPath isEqualToString:@"selectedIndex"]){
         NSInteger oldIndex = [change[NSKeyValueChangeOldKey] integerValue];
         NSInteger currentIndex = [change[NSKeyValueChangeNewKey] integerValue];
         //    NSLog(@"oldIndex:%ld-----currentIndex:%ld",(long)oldIndex,(long)currentIndex);
@@ -347,8 +309,7 @@
 - (void)addTopTitleLabels {
     if(!self.isViewLoaded) return;
     if(self.subViewControllers.count < 1) return;
-    //    __block CGFloat totalWidth = [self horizontalSpaceOfTitleLabel];
-    __block CGFloat totalWidth = [self topTitleViewLeftLabelInset];
+//    __block CGFloat totalWidth = [self topTitleViewLeftLabelInset];
     [self.subViewControllers enumerateObjectsUsingBlock:^(__kindof UIViewController * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
         UILabel *label = [UILabel new];
         label.numberOfLines = 0;
@@ -371,15 +332,15 @@
             [attributedStr addAttribute:NSForegroundColorAttributeName value:[self normalColorOfTitleLabel] range:NSMakeRange(0, attributedStr.length)];
         }
         label.attributedText = attributedStr;
-        CGSize size = [label sizeThatFits:CGSizeMake(MAXFLOAT, [self topTitleViewHeight])];
-        label.frame = CGRectMake(totalWidth, 0, size.width, [self topTitleViewHeight]);
-        if(idx == self.subViewControllers.count - 1){
-            totalWidth += size.width + [self topTitleViewRightLabelInset];
-        }else{
-            totalWidth += size.width + [self horizontalSpaceOfTitleLabel];
-        }
+//        CGSize size = [label sizeThatFits:CGSizeMake(MAXFLOAT, [self topTitleViewHeight])];
+//        label.frame = CGRectMake(totalWidth, 0, size.width, [self topTitleViewHeight]);
+//        if(idx == self.subViewControllers.count - 1){
+//            totalWidth += size.width + [self topTitleViewRightLabelInset];
+//        }else{
+//            totalWidth += size.width + [self horizontalSpaceOfTitleLabel];
+//        }
     }];
-    self.topTitleScrollView.contentSize = CGSizeMake(totalWidth, 0);
+//    self.topTitleScrollView.contentSize = CGSizeMake(totalWidth, 0);
     CGRect rect = [self.topTitleScrollView viewWithTag:100].frame;
     self.titleBottomView.bounds = CGRectMake(0, 0, [self shouldDynamicChangeTitleBottomViewWidth] ?  rect.size.width : self.tmpTitleBottomViewWidth, [self titleBottomViewHeight]);
     self.titleBottomView.center = CGPointMake(CGRectGetMidX(rect), [self topTitleViewHeight] - [self verticalSpaceBetweenBottom] - [self titleBottomViewHeight]/2.0);
@@ -409,6 +370,10 @@
 }
 
 #pragma mark - Override
+- (BOOL)shouldLayoutTitleLabelSpaceAround {
+    return YES;
+}
+
 - (BOOL)shouldDynamicChangeTitleBottomViewWidth {
     return YES;
 }
@@ -438,7 +403,7 @@
 }
 
 - (CGFloat)horizontalSpaceOfTitleLabel {
-    return 20;
+    return 40;
 }
 
 - (UIColor *)selectedColorOfTitleLabel {
@@ -643,6 +608,19 @@
             totalWidth += size.width + [self horizontalSpaceOfTitleLabel];
         }
     }
+    if([self shouldLayoutTitleLabelSpaceAround] && self.subViewControllers.count > 0 && totalWidth < self.topTitleScrollView.bounds.size.width){
+        CGFloat allLabelWidth = totalWidth - [self topTitleViewLeftLabelInset] - [self topTitleViewRightLabelInset] - (self.subViewControllers.count - 1)*[self horizontalSpaceOfTitleLabel];
+        CGFloat space = (self.topTitleScrollView.bounds.size.width - allLabelWidth)*1.0/self.subViewControllers.count;
+        CGFloat allWidth = space/2.0;
+        for(int i=0;i<self.subViewControllers.count;i++){
+            UILabel *label = (UILabel *)[self.topTitleScrollView viewWithTag:i+100];
+            CGRect rect = label.frame;
+            rect.origin.x = allWidth;
+            label.frame = rect;
+            allWidth += space + rect.size.width;
+        }
+    }
+
     if(totalWidth < self.topTitleScrollView.bounds.size.width){
         totalWidth = self.topTitleScrollView.bounds.size.width;
     }
