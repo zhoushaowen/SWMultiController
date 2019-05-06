@@ -37,6 +37,8 @@
 @property (nonatomic,strong) NSValue *lastContentOffset;
 @property (nonatomic,strong) NSMapTable *headerViews;
 @property (nonatomic,strong) RACDisposable *multiHeaderViewFrameDisposable;
+@property (nonatomic) BOOL shouldSpaceAround;
+@property (nonatomic) CGFloat space;
 
 - (UIScrollView *)sw_getAssociatedScrollViewWithSubViewController:(UIViewController *)subViewController;
 
@@ -309,7 +311,7 @@
 - (void)addTopTitleLabels {
     if(!self.isViewLoaded) return;
     if(self.subViewControllers.count < 1) return;
-//    __block CGFloat totalWidth = [self topTitleViewLeftLabelInset];
+    __block CGFloat totalWidth = [self topTitleViewLeftLabelInset];
     [self.subViewControllers enumerateObjectsUsingBlock:^(__kindof UIViewController * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
         UILabel *label = [UILabel new];
         label.numberOfLines = 0;
@@ -332,15 +334,22 @@
             [attributedStr addAttribute:NSForegroundColorAttributeName value:[self normalColorOfTitleLabel] range:NSMakeRange(0, attributedStr.length)];
         }
         label.attributedText = attributedStr;
-//        CGSize size = [label sizeThatFits:CGSizeMake(MAXFLOAT, [self topTitleViewHeight])];
+        CGSize size = [label sizeThatFits:CGSizeMake(MAXFLOAT, [self topTitleViewHeight])];
 //        label.frame = CGRectMake(totalWidth, 0, size.width, [self topTitleViewHeight]);
-//        if(idx == self.subViewControllers.count - 1){
-//            totalWidth += size.width + [self topTitleViewRightLabelInset];
-//        }else{
-//            totalWidth += size.width + [self horizontalSpaceOfTitleLabel];
-//        }
+        if(idx == self.subViewControllers.count - 1){
+            totalWidth += size.width + [self topTitleViewRightLabelInset];
+        }else{
+            totalWidth += size.width + [self horizontalSpaceOfTitleLabel];
+        }
     }];
 //    self.topTitleScrollView.contentSize = CGSizeMake(totalWidth, 0);
+    self.shouldSpaceAround = NO;
+    if([self shouldLayoutTitleLabelSpaceAround] && self.subViewControllers.count > 0 && totalWidth < self.topTitleScrollView.bounds.size.width){
+        CGFloat allLabelWidth = totalWidth - [self topTitleViewLeftLabelInset] - [self topTitleViewRightLabelInset] - (self.subViewControllers.count - 1)*[self horizontalSpaceOfTitleLabel];
+        CGFloat space = (self.topTitleScrollView.bounds.size.width - allLabelWidth)*1.0/self.subViewControllers.count;
+        self.space = space;
+        self.shouldSpaceAround = YES;
+    }
     CGRect rect = [self.topTitleScrollView viewWithTag:100].frame;
     self.titleBottomView.bounds = CGRectMake(0, 0, [self shouldDynamicChangeTitleBottomViewWidth] ?  rect.size.width : self.tmpTitleBottomViewWidth, [self titleBottomViewHeight]);
     self.titleBottomView.center = CGPointMake(CGRectGetMidX(rect), [self topTitleViewHeight] - [self verticalSpaceBetweenBottom] - [self titleBottomViewHeight]/2.0);
@@ -403,7 +412,10 @@
 }
 
 - (CGFloat)horizontalSpaceOfTitleLabel {
-    return 40;
+    if(self.shouldSpaceAround){
+        return self.space;
+    }
+    return 25;
 }
 
 - (UIColor *)selectedColorOfTitleLabel {
@@ -431,10 +443,16 @@
 }
 
 - (CGFloat)topTitleViewLeftLabelInset {
+    if(self.shouldSpaceAround){
+        return self.space/2.0;
+    }
     return 20;
 }
 
 - (CGFloat)topTitleViewRightLabelInset {
+    if(self.shouldSpaceAround){
+        return self.space/2.0;
+    }
     return 20;
 }
 
@@ -608,19 +626,18 @@
             totalWidth += size.width + [self horizontalSpaceOfTitleLabel];
         }
     }
-    if([self shouldLayoutTitleLabelSpaceAround] && self.subViewControllers.count > 0 && totalWidth < self.topTitleScrollView.bounds.size.width){
-        CGFloat allLabelWidth = totalWidth - [self topTitleViewLeftLabelInset] - [self topTitleViewRightLabelInset] - (self.subViewControllers.count - 1)*[self horizontalSpaceOfTitleLabel];
-        CGFloat space = (self.topTitleScrollView.bounds.size.width - allLabelWidth)*1.0/self.subViewControllers.count;
-        CGFloat allWidth = space/2.0;
-        for(int i=0;i<self.subViewControllers.count;i++){
-            UILabel *label = (UILabel *)[self.topTitleScrollView viewWithTag:i+100];
-            CGRect rect = label.frame;
-            rect.origin.x = allWidth;
-            label.frame = rect;
-            allWidth += space + rect.size.width;
-        }
-    }
-
+//    if(self.shouldSpaceAround){
+//        CGFloat allLabelWidth = totalWidth - [self topTitleViewLeftLabelInset] - [self topTitleViewRightLabelInset] - (self.subViewControllers.count - 1)*[self horizontalSpaceOfTitleLabel];
+//        CGFloat space = (self.topTitleScrollView.bounds.size.width - allLabelWidth)*1.0/self.subViewControllers.count;
+//        CGFloat allWidth = space/2.0;
+//        for(int i=0;i<self.subViewControllers.count;i++){
+//            UILabel *label = (UILabel *)[self.topTitleScrollView viewWithTag:i+100];
+//            CGRect rect = label.frame;
+//            rect.origin.x = allWidth;
+//            label.frame = rect;
+//            allWidth += space + rect.size.width;
+//        }
+//    }
     if(totalWidth < self.topTitleScrollView.bounds.size.width){
         totalWidth = self.topTitleScrollView.bounds.size.width;
     }

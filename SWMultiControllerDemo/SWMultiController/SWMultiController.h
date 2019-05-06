@@ -140,7 +140,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (CGFloat)topTitleViewRightLabelInset;
 
 /**
- 标题之间的水平间距,默认值40
+ 标题之间的水平间距,默认值25
  可以重写此方法,进行自定义
  */
 

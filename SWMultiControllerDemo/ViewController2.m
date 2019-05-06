@@ -25,9 +25,9 @@
     [super viewDidLoad];
     self.view.backgroundColor = [UIColor whiteColor];
     NSMutableArray *mutableArr = [NSMutableArray arrayWithCapacity:0];
-    for (int i=0; i<3; i++) {
+    for (int i=0; i<4; i++) {
         SubViewController *subVC = [SubViewController new];
-        subVC.title = [NSString stringWithFormat:@"第%d个标题",i];
+        subVC.title = [NSString stringWithFormat:@"第%d个",i];
         [mutableArr addObject:subVC];
     }
     SWMultiController *vc = [[SWMultiController alloc] initWithSubControllers:mutableArr];
