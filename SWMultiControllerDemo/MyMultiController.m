@@ -17,6 +17,7 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    self.topTitleImageView.image = [UIImage imageNamed:@"状态导航栏"];
     self.topTitleView.backgroundColor = [UIColor whiteColor];
     NSMutableArray *mutableArr = [NSMutableArray arrayWithCapacity:0];
     for (int i=0; i<10; i++) {
@@ -56,9 +57,9 @@
     return NO;
 }
 
-- (CGFloat)titleBottomViewWidth {
-    return 60;
-}
+//- (CGFloat)titleBottomViewWidth {
+//    return 60;
+//}
 
 - (UIFont *)normalFontOfTitleLabel {
     return [UIFont systemFontOfSize:14];
@@ -84,24 +85,32 @@
     return 3;
 }
 
-- (UIColor *)titleBottomViewColor {
-    return [UIColor redColor];
-}
+//- (UIColor *)titleBottomViewColor {
+//    return [UIColor redColor];
+//}
 
 - (CGFloat)topTitleViewHeight {
     return 80;
 }
 
-- (CGFloat)titleBottomViewHeight {
-    return 2;
+//- (CGFloat)titleBottomViewHeight {
+//    return 2;
+//}
+
+//- (CGFloat)titleBottomViewCornerRadius {
+//    return 1.0f;
+//}
+
+//- (CGFloat)titleLabelBaselineOffset {
+//    return -5.0;
+//}
+
+- (CGFloat)titleLabelOriginX {
+    return 10;
 }
 
-- (CGFloat)titleBottomViewCornerRadius {
-    return 1.0f;
-}
-
-- (CGFloat)titleLabelBaselineOffset {
-    return -5.0;
+- (UIImage *)imageForBottomView {
+    return [UIImage imageNamed:@"下划线分割"];
 }
 
 @end

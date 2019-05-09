@@ -24,9 +24,10 @@
     BOOL _flag;
 }
 @property (nonatomic) UIView *topTitleView;
+@property (nonatomic) UIImageView *topTitleImageView;
 @property (nonatomic) UIScrollView *scrollBgView;
 @property (nonatomic) UIScrollView *topTitleScrollView;
-@property (nonatomic) UIView *titleBottomView;
+@property (nonatomic) UIImageView *titleBottomView;
 @property (nonatomic,copy) NSArray<UIViewController *> *subViewControllers;
 @property (nonatomic) NSUInteger selectedIndex;
 @property (nonatomic) NSInteger initializedIndex;
@@ -164,6 +165,13 @@
         [self.view addSubview:view];
         view;
     });
+    self.topTitleImageView = ({
+        UIImageView *imgV = [[UIImageView alloc] init];
+        imgV.frame = self.topTitleView.bounds;
+        imgV.autoresizingMask = UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight;
+        [self.topTitleView addSubview:imgV];
+        imgV;
+    });
     self.topTitleScrollView = ({
         UIScrollView *scroll = [[UIScrollView alloc] initWithFrame:self.topTitleView.bounds];
         if (@available(iOS 11.0, *)) {
@@ -177,11 +185,11 @@
         scroll;
     });
     self.titleBottomView = ({
-        UIView *view = [UIView new];
+        UIImageView *view = [UIImageView new];
         [self.topTitleScrollView addSubview:view];
-        view.userInteractionEnabled = NO;
         view.backgroundColor = [self titleBottomViewColor];
         view.layer.cornerRadius = [self titleBottomViewCornerRadius];
+        view.image = [self imageForBottomView];
         view.clipsToBounds = YES;
         view.hidden = _hiddenTitleBottomView;
         view;
@@ -334,7 +342,7 @@
             [attributedStr addAttribute:NSForegroundColorAttributeName value:[self normalColorOfTitleLabel] range:NSMakeRange(0, attributedStr.length)];
         }
         label.attributedText = attributedStr;
-        CGSize size = [label sizeThatFits:CGSizeMake(MAXFLOAT, [self topTitleViewHeight])];
+        CGSize size = [label sizeThatFits:CGSizeMake(MAXFLOAT, [self titleLabelHeight])];
 //        label.frame = CGRectMake(totalWidth, 0, size.width, [self topTitleViewHeight]);
         if(idx == self.subViewControllers.count - 1){
             totalWidth += size.width + [self topTitleViewRightLabelInset];
@@ -384,10 +392,14 @@
 }
 
 - (BOOL)shouldDynamicChangeTitleBottomViewWidth {
+    if([self imageForBottomView]) return NO;
     return YES;
 }
 
 - (CGFloat)titleBottomViewWidth {
+    if([self imageForBottomView]){
+        return [self imageForBottomView].size.width;
+    }
     return 0;
 }
 
@@ -396,14 +408,21 @@
 }
 
 - (UIColor *)titleBottomViewColor {
+    if([self imageForBottomView]){
+        return nil;
+    }
     return [UIColor greenColor];
 }
 
 - (CGFloat)titleBottomViewHeight {
+    if([self imageForBottomView]){
+        return [self imageForBottomView].size.height;
+    }
     return 4;
 }
 
 - (CGFloat)titleBottomViewCornerRadius {
+    if([self imageForBottomView]) return 0;
     return 4/2.0f;
 }
 
@@ -445,6 +464,18 @@
 
 - (CGFloat)topTitleViewRightLabelInset {
     return 20;
+}
+
+- (CGFloat)titleLabelHeight {
+    return [self topTitleViewHeight];
+}
+
+- (CGFloat)titleLabelOriginX {
+    return 0;
+}
+
+- (UIImage *)imageForBottomView {
+    return nil;
 }
 
 #pragma mark - UIGestureRecognizerDelegate
@@ -498,7 +529,7 @@
             }else{
                 tmpLabel.font = [self selectedFontOfTitleLabel];
             }
-            width = [tmpLabel sizeThatFits:CGSizeMake(MAXFLOAT, [self topTitleViewHeight])].width;
+            width = [tmpLabel sizeThatFits:CGSizeMake(MAXFLOAT, [self titleLabelHeight])].width;
             if(i == self.subViewControllers.count - 1){
                 totalWidth += width + (self.shouldSpaceAround?(self.space/2.0): [self topTitleViewRightLabelInset]);
             }else{
@@ -577,18 +608,18 @@
 
 - (void)changeTitleBottomViewWithCurrentIndex:(NSInteger)currentIndex percent:(CGFloat)percent currentLabel:(UILabel *)currentLabel nextLabel:(UILabel *)nextLabel {
     if(_hiddenTitleBottomView) return;
-    CGFloat nextLabelWidth = [nextLabel sizeThatFits:CGSizeMake(MAXFLOAT, [self topTitleViewHeight])].width;
-    CGFloat currentLabelWidth = [currentLabel sizeThatFits:CGSizeMake(MAXFLOAT, [self topTitleViewHeight])].width;
+    CGFloat nextLabelWidth = [nextLabel sizeThatFits:CGSizeMake(MAXFLOAT, [self titleLabelHeight])].width;
+    CGFloat currentLabelWidth = [currentLabel sizeThatFits:CGSizeMake(MAXFLOAT, [self titleLabelHeight])].width;
     CGFloat widthOffset = nextLabelWidth - currentLabelWidth;
     CGFloat nextLabelCenterX = 0;
     for(int i=0;i<currentIndex + 2;i++){
         UILabel *label = [self.topTitleScrollView viewWithTag:i + 100];
         CGFloat width = 0;
         if(i == (currentIndex + 1)){//如果是最后一个label,只需计算出label长度的一半
-            width = [label sizeThatFits:CGSizeMake(MAXFLOAT, [self topTitleViewHeight])].width/2.0f;
+            width = [label sizeThatFits:CGSizeMake(MAXFLOAT, [self titleLabelHeight])].width/2.0f;
             nextLabelCenterX += width + (self.shouldSpaceAround?(self.space/2.0): [self topTitleViewRightLabelInset]);
         }else{
-            width = [label sizeThatFits:CGSizeMake(MAXFLOAT, [self topTitleViewHeight])].width;
+            width = [label sizeThatFits:CGSizeMake(MAXFLOAT, [self titleLabelHeight])].width;
             nextLabelCenterX += width + (self.shouldSpaceAround?self.space:[self horizontalSpaceOfTitleLabel]);
         }
     }
@@ -609,8 +640,8 @@
     CGFloat totalWidth = self.shouldSpaceAround?(self.space/2.0): [self topTitleViewLeftLabelInset];
     for(int i=0;i<self.subViewControllers.count;i++){
         UILabel *label = [self.topTitleScrollView viewWithTag:i + 100];
-        CGSize size = [label sizeThatFits:CGSizeMake(MAXFLOAT, [self topTitleViewHeight])];
-        label.frame = CGRectMake(totalWidth, 0, size.width, [self topTitleViewHeight]);
+        CGSize size = [label sizeThatFits:CGSizeMake(MAXFLOAT, [self titleLabelHeight])];
+        label.frame = CGRectMake(totalWidth, [self titleLabelOriginX], size.width, [self titleLabelHeight]);
         if(i == self.subViewControllers.count - 1){
             totalWidth += size.width + (self.shouldSpaceAround?(self.space/2.0): [self topTitleViewRightLabelInset]);
         }else{

@@ -66,6 +66,11 @@ NS_ASSUME_NONNULL_BEGIN
  顶部滑动视图的背景视图
  */
 @property (nonatomic,readonly,strong) UIView *topTitleView;
+
+/**
+topTitleView之上的一个imageView
+ */
+@property (nonatomic,readonly,strong) UIImageView *topTitleImageView;
 /**
  是否隐藏标题下方的横线,默认NO
  */
@@ -115,17 +120,30 @@ NS_ASSUME_NONNULL_BEGIN
 - (BOOL)shouldLayoutTitleLabelSpaceAround;
 /**
  是否允许动态改变标题底部横线视图的宽度,默认是YES;
+ 如果imageForBottomView不为nil,默认是NO;
  如果不想随着scrollView的滑动动态改变,那么需要重写此方法返回NO,并且实现titleBottomViewWidth方法,返回一个固定的高度;
  */
 - (BOOL)shouldDynamicChangeTitleBottomViewWidth;
 
 /**
- 标题底部横线视图的宽度;
+ 标题底部横线视图的宽度,默认是0;
+ 如果imageForBottomView不为nil,默认是image的宽度;
  如果shouldDynamicChangeTitleBottomViewWidth方法返回值是YES,那么重写本方法没有任何作用;
  */
 - (CGFloat)titleBottomViewWidth;
 /**
- 顶部标题视图的高度
+ 底部横线视图的高度,默认是4;
+ 如果imageForBottomView不为nil,默认是image的高度;
+ 可以重写此方法,进行自定义
+ */
+- (CGFloat)titleBottomViewHeight;
+
+/**
+ bottomView的background image,默认为nil;
+ */
+- (UIImage *)imageForBottomView;
+/**
+ 顶部标题视图的高度,默认是60;
  可以重写此方法,进行自定义
  */
 - (CGFloat)topTitleViewHeight;
@@ -182,19 +200,15 @@ NS_ASSUME_NONNULL_BEGIN
 - (CGFloat)verticalSpaceBetweenBottom;
 
 /**
- 底部横线视图的圆角半径
+ 底部横线视图的圆角半径,默认是2;
+ 如果imageForBottomView不为nil,默认是0;
  可以重写此方法,进行自定义
  */
 - (CGFloat)titleBottomViewCornerRadius;
 
 /**
- 底部横线视图的高度
- 可以重写此方法,进行自定义
- */
-- (CGFloat)titleBottomViewHeight;
-
-/**
- 底部横线视图的颜色
+ 底部横线视图的颜色,默认是green;
+ 如果imageForBottomView不为nil,默认是nil;
  可以重写此方法,进行自定义
  */
 - (UIColor *)titleBottomViewColor;
@@ -205,7 +219,15 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (CGFloat)titleLabelBaselineOffset;
 
+/**
+ label的固定高度,默认高度等于topTitleViewHeight
+ */
+- (CGFloat)titleLabelHeight;
 
+/**
+ label的原点X值,默认是0
+ */
+- (CGFloat)titleLabelOriginX;
 
 
 
