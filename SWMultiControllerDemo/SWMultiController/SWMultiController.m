@@ -161,7 +161,7 @@
             view.frame = CGRectMake(0, 0, self.view.bounds.size.width, [self topTitleViewHeight]);
         }
         view.autoresizingMask = UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleBottomMargin;
-        view.backgroundColor = [UIColor blackColor];
+        view.backgroundColor = [UIColor whiteColor];
         [self.view addSubview:view];
         view;
     });
@@ -360,7 +360,7 @@
     }
     CGRect rect = [self.topTitleScrollView viewWithTag:100].frame;
     self.titleBottomView.bounds = CGRectMake(0, 0, [self shouldDynamicChangeTitleBottomViewWidth] ?  rect.size.width : self.tmpTitleBottomViewWidth, [self titleBottomViewHeight]);
-    self.titleBottomView.center = CGPointMake(CGRectGetMidX(rect), [self topTitleViewHeight] - [self verticalSpaceBetweenBottom] - [self titleBottomViewHeight]/2.0);
+    self.titleBottomView.center = CGPointMake(CGRectGetMidX(rect), [self topTitleViewHeight] - [self verticalSpaceBetweenBottomAndTitleBottomView] - [self titleBottomViewHeight]/2.0);
     self.scrollBgView.contentSize = CGSizeMake(self.view.bounds.size.width*self.subViewControllers.count, 0);
 }
 
@@ -426,7 +426,7 @@
     return 4/2.0f;
 }
 
-- (CGFloat)verticalSpaceBetweenBottom {
+- (CGFloat)verticalSpaceBetweenBottomAndTitleBottomView {
     return 8;
 }
 
@@ -470,7 +470,7 @@
     return [self topTitleViewHeight];
 }
 
-- (CGFloat)titleLabelOriginX {
+- (CGFloat)titleLabelOriginY {
     return 0;
 }
 
@@ -641,7 +641,7 @@
     for(int i=0;i<self.subViewControllers.count;i++){
         UILabel *label = [self.topTitleScrollView viewWithTag:i + 100];
         CGSize size = [label sizeThatFits:CGSizeMake(MAXFLOAT, [self titleLabelHeight])];
-        label.frame = CGRectMake(totalWidth, [self titleLabelOriginX], size.width, [self titleLabelHeight]);
+        label.frame = CGRectMake(totalWidth, [self titleLabelOriginY], size.width, [self titleLabelHeight]);
         if(i == self.subViewControllers.count - 1){
             totalWidth += size.width + (self.shouldSpaceAround?(self.space/2.0): [self topTitleViewRightLabelInset]);
         }else{

@@ -81,7 +81,7 @@
     return 8;
 }
 
-- (CGFloat)verticalSpaceBetweenBottom {
+- (CGFloat)verticalSpaceBetweenBottomAndTitleBottomView {
     return 3;
 }
 
@@ -105,7 +105,7 @@
 //    return -5.0;
 //}
 
-- (CGFloat)titleLabelOriginX {
+- (CGFloat)titleLabelOriginY {
     return 10;
 }
 

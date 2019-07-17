@@ -197,7 +197,7 @@ topTitleView之上的一个imageView
  底部横线视图的距离底部的距离
  可以重写此方法,进行自定义
  */
-- (CGFloat)verticalSpaceBetweenBottom;
+- (CGFloat)verticalSpaceBetweenBottomAndTitleBottomView;
 
 /**
  底部横线视图的圆角半径,默认是2;
@@ -225,9 +225,9 @@ topTitleView之上的一个imageView
 - (CGFloat)titleLabelHeight;
 
 /**
- label的原点X值,默认是0
+ label的原点y值,默认是0
  */
-- (CGFloat)titleLabelOriginX;
+- (CGFloat)titleLabelOriginY;
 
 
 
