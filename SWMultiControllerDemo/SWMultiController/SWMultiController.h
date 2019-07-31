@@ -62,13 +62,14 @@ NS_ASSUME_NONNULL_BEGIN
  最底层的scrollView
  */
 @property (nonatomic,readonly,strong) UIScrollView *scrollBgView;
+@property (nonatomic,readonly,copy) NSArray<UILabel *> *labels;
 /**
  顶部滑动视图的背景视图
  */
 @property (nonatomic,readonly,strong) UIView *topTitleView;
 
 /**
-topTitleView之上的一个imageView
+ topTitleView之上的一个imageView
  */
 @property (nonatomic,readonly,strong) UIImageView *topTitleImageView;
 /**
@@ -85,7 +86,7 @@ topTitleView之上的一个imageView
 
 /**
  当前控制器的索引
-
+ 
  @return 索引
  */
 - (NSUInteger)selectedIndex;

@@ -29,6 +29,7 @@
 @property (nonatomic) UIScrollView *topTitleScrollView;
 @property (nonatomic) UIImageView *titleBottomView;
 @property (nonatomic,copy) NSArray<UIViewController *> *subViewControllers;
+@property (nonatomic,copy) NSArray<UILabel *> *labels;
 @property (nonatomic) NSUInteger selectedIndex;
 @property (nonatomic) NSInteger initializedIndex;
 @property (nonatomic) BOOL shouldIgnoreContentOffset;
@@ -59,12 +60,12 @@
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSKeyValueChangeKey,id> *)change context:(void *)context {
     //        NSLog(@"%@------%@-------%@-----%@",object,keyPath,change,context);
-//    if([keyPath isEqualToString:@"frame"]){
-        //        CGRect rect = [change[NSKeyValueChangeNewKey] CGRectValue];
-        //        UIViewController *subVC = (__bridge UIViewController *)(context);
-        //        [self updateAssociatedScrollViewContentOffsetWithSubViewController:subVC rect:rect];
-//    }else
-        if ([keyPath isEqualToString:@"selectedIndex"]){
+    //    if([keyPath isEqualToString:@"frame"]){
+    //        CGRect rect = [change[NSKeyValueChangeNewKey] CGRectValue];
+    //        UIViewController *subVC = (__bridge UIViewController *)(context);
+    //        [self updateAssociatedScrollViewContentOffsetWithSubViewController:subVC rect:rect];
+    //    }else
+    if ([keyPath isEqualToString:@"selectedIndex"]){
         NSInteger oldIndex = [change[NSKeyValueChangeOldKey] integerValue];
         NSInteger currentIndex = [change[NSKeyValueChangeNewKey] integerValue];
         //    NSLog(@"oldIndex:%ld-----currentIndex:%ld",(long)oldIndex,(long)currentIndex);
@@ -318,10 +319,15 @@
 
 - (void)addTopTitleLabels {
     if(!self.isViewLoaded) return;
-    if(self.subViewControllers.count < 1) return;
+    if(self.subViewControllers.count < 1) {
+        self.labels = nil;
+        return;
+    }
     __block CGFloat totalWidth = [self topTitleViewLeftLabelInset];
+    NSMutableArray *labels = [NSMutableArray arrayWithCapacity:0];
     [self.subViewControllers enumerateObjectsUsingBlock:^(__kindof UIViewController * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
         UILabel *label = [UILabel new];
+        [labels addObject:label];
         label.numberOfLines = 0;
         label.textAlignment = [self titleLabelTextAlignment];
         label.userInteractionEnabled = YES;
@@ -343,14 +349,15 @@
         }
         label.attributedText = attributedStr;
         CGSize size = [label sizeThatFits:CGSizeMake(MAXFLOAT, [self titleLabelHeight])];
-//        label.frame = CGRectMake(totalWidth, 0, size.width, [self topTitleViewHeight]);
+        //        label.frame = CGRectMake(totalWidth, 0, size.width, [self topTitleViewHeight]);
         if(idx == self.subViewControllers.count - 1){
             totalWidth += size.width + [self topTitleViewRightLabelInset];
         }else{
             totalWidth += size.width + [self horizontalSpaceOfTitleLabel];
         }
     }];
-//    self.topTitleScrollView.contentSize = CGSizeMake(totalWidth, 0);
+    self.labels = labels;
+    //    self.topTitleScrollView.contentSize = CGSizeMake(totalWidth, 0);
     self.shouldSpaceAround = NO;
     if([self shouldLayoutTitleLabelSpaceAround] && self.subViewControllers.count > 0 && totalWidth < self.topTitleScrollView.bounds.size.width){
         CGFloat allLabelWidth = totalWidth - [self topTitleViewLeftLabelInset] - [self topTitleViewRightLabelInset] - (self.subViewControllers.count - 1)*[self horizontalSpaceOfTitleLabel];
