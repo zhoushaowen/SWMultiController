@@ -47,6 +47,8 @@ NS_ASSUME_NONNULL_BEGIN
  选中了某个控制器的回调
  */
 @property (nonatomic,strong) void(^didSelectedControllerBlock)(UIViewController *selectedController,NSInteger index);
+///点击label的回调
+@property (nonatomic,strong) void(^didTapTitleLabelBlock)(UILabel *tapLabl,NSInteger index);
 
 /**
  已经不选中某个控制器的回调

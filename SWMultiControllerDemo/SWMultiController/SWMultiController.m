@@ -681,6 +681,9 @@
 - (void)handleTapGesture:(UITapGestureRecognizer *)gesture {
     NSInteger index = gesture.view.tag - 100;
     [self selectedIndex:index];
+    if(self.didTapTitleLabelBlock){
+        self.didTapTitleLabelBlock((UILabel *)gesture.view, index);
+    }
 }
 
 - (void)addObserver {
