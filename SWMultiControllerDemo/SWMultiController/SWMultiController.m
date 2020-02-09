@@ -618,13 +618,14 @@
     CGFloat nextLabelWidth = [nextLabel sizeThatFits:CGSizeMake(MAXFLOAT, [self titleLabelHeight])].width;
     CGFloat currentLabelWidth = [currentLabel sizeThatFits:CGSizeMake(MAXFLOAT, [self titleLabelHeight])].width;
     CGFloat widthOffset = nextLabelWidth - currentLabelWidth;
-    CGFloat nextLabelCenterX = 0;
+    CGFloat nextLabelCenterX = self.shouldSpaceAround?0:[self topTitleViewLeftLabelInset];
     for(int i=0;i<currentIndex + 2;i++){
         UILabel *label = [self.topTitleScrollView viewWithTag:i + 100];
         CGFloat width = 0;
         if(i == (currentIndex + 1)){//如果是最后一个label,只需计算出label长度的一半
             width = [label sizeThatFits:CGSizeMake(MAXFLOAT, [self titleLabelHeight])].width/2.0f;
-            nextLabelCenterX += width + (self.shouldSpaceAround?(self.space/2.0): [self topTitleViewRightLabelInset]);
+//            nextLabelCenterX += width + (self.shouldSpaceAround?(self.space/2.0): [self topTitleViewRightLabelInset]);
+            nextLabelCenterX += width + (self.shouldSpaceAround?(self.space/2.0): 0);
         }else{
             width = [label sizeThatFits:CGSizeMake(MAXFLOAT, [self titleLabelHeight])].width;
             nextLabelCenterX += width + (self.shouldSpaceAround?self.space:[self horizontalSpaceOfTitleLabel]);
