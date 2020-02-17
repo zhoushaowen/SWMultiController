@@ -43,6 +43,9 @@ NS_ASSUME_NONNULL_BEGIN
  @param selectedIndex 选择的索引
  */
 - (void)reloadWithSubViewControllers:(NSArray<UIViewController *> *)subViewControllers selectedIndex:(NSUInteger)selectedIndex;
+
+/// 子控制器
+@property (nonatomic,copy,readonly) NSArray<UIViewController *> *subViewControllers;
 /**
  选中了某个控制器的回调
  */
