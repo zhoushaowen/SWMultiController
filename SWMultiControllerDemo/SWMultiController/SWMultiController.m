@@ -73,6 +73,7 @@
         if(oldIndex != - 1){
             UIViewController *oldVC = multiController.subViewControllers[oldIndex];
             if(!oldVC) return;
+            if(oldIndex == currentIndex) return;
             if(multiController.sw_isViewDidAppeared){
                 [oldVC beginAppearanceTransition:NO animated:YES];
                 [oldVC endAppearanceTransition];
@@ -84,6 +85,7 @@
         if(currentIndex != -1){
             UIViewController *currentVC = multiController.subViewControllers[currentIndex];
             if(!currentVC) return;
+            if(oldIndex == currentIndex) return;
             if(multiController.sw_isViewDidAppeared){
                 [currentVC beginAppearanceTransition:YES animated:YES];
                 [currentVC endAppearanceTransition];
