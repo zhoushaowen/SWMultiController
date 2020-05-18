@@ -68,6 +68,7 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (nonatomic,readonly,strong) UIScrollView *scrollBgView;
 @property (nonatomic,readonly,copy) NSArray<UILabel *> *labels;
+@property (nonatomic,readonly) UIImageView *titleBottomView;
 /**
  顶部滑动视图的背景视图
  */

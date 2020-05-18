@@ -2,7 +2,7 @@ Pod::Spec.new do |s|
 
   s.name         = "SWMultiController"
 
-  s.version      = "2.2.6"
+  s.version      = "2.2.7"
 
   s.homepage      = 'https://github.com/zhoushaowen/SWMultiController'
 
