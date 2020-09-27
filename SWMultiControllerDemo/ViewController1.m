@@ -51,7 +51,18 @@
 //    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(3 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
 //        headerView.frame = CGRectMake(0, 0, self.view.bounds.size.width, 500);
 //    });
+    self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"改变标题" style:UIBarButtonItemStylePlain target:self action:@selector(changeTitles)];
     
+}
+
+- (void)changeTitles {
+//    NSMutableArray *titles = [NSMutableArray arrayWithCapacity:10];
+//    for (int i=0; i<10; i++) {
+//        NSString *title = [NSString stringWithFormat:@"标题%d",i];
+//        [titles addObject:title];
+//    }
+//    [_multiController reloadSubViewControllerTitles:titles];
+    [_multiController reloadSubViewControllerTitle:@"改变之后的标题" withIndex:1];
 }
 
 - (void)viewWillLayoutSubviews {

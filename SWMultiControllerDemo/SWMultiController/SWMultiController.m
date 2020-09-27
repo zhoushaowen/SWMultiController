@@ -728,9 +728,9 @@
     UILabel *currentLabel = [self.topTitleScrollView viewWithTag:self.selectedIndex + 100];
     UILabel *nextLabel = [self.topTitleScrollView viewWithTag:index + 100];
     currentLabel.font = [self getFontWithBeginFont:[self selectedFontOfTitleLabel] endFont:[self normalFontOfTitleLabel] percent:1.0f];
-    nextLabel.font = [self getFontWithBeginFont:[self normalFontOfTitleLabel] endFont:[self selectedFontOfTitleLabel] percent:1.0f];
     currentLabel.textColor = [self getColorWithBeginColor:[self selectedColorOfTitleLabel] endColor:[self normalColorOfTitleLabel] percent:1.0f];
     nextLabel.textColor = [self getColorWithBeginColor:[self normalColorOfTitleLabel] endColor:[self selectedColorOfTitleLabel] percent:1.0f];
+    nextLabel.font = [self getFontWithBeginFont:[self normalFontOfTitleLabel] endFont:[self selectedFontOfTitleLabel] percent:1.0f];
     [self changeTitleBottomViewWithCurrentIndex:self.selectedIndex percent:1.0 currentLabel:currentLabel nextLabel:nextLabel];
     [self updateTopTitleScrollViewContentSize];
     CGRect bounds = self.titleBottomView.bounds;
@@ -788,6 +788,80 @@
 - (void)setHiddenTitleBottomView:(BOOL)hiddenTitleBottomView {
     _hiddenTitleBottomView = hiddenTitleBottomView;
     self.titleBottomView.hidden = _hiddenTitleBottomView;
+}
+
+- (void)reloadSubViewControllerTitles:(NSArray<NSString *> *)titles {
+    titles = [titles copy];
+    __block CGFloat totalWidth = [self topTitleViewLeftLabelInset];
+    [titles enumerateObjectsUsingBlock:^(NSString * _Nonnull text, NSUInteger idx, BOOL * _Nonnull stop) {
+        if(idx >= self.labels.count) return;
+        UILabel *label = self.labels[idx];
+        NSMutableAttributedString *attributedStr = [[NSMutableAttributedString alloc] initWithString:text];
+        [attributedStr addAttribute:NSBaselineOffsetAttributeName value:@([self titleLabelBaselineOffset]) range:NSMakeRange(0, attributedStr.length)];
+        if(idx == self.selectedIndex){
+            [attributedStr addAttribute:NSFontAttributeName value:[self selectedFontOfTitleLabel] range:NSMakeRange(0, attributedStr.length)];
+            [attributedStr addAttribute:NSForegroundColorAttributeName value:[self selectedColorOfTitleLabel] range:NSMakeRange(0, attributedStr.length)];
+        }else{
+            [attributedStr addAttribute:NSFontAttributeName value:[self normalFontOfTitleLabel] range:NSMakeRange(0, attributedStr.length)];
+            [attributedStr addAttribute:NSForegroundColorAttributeName value:[self normalColorOfTitleLabel] range:NSMakeRange(0, attributedStr.length)];
+        }
+        label.attributedText = attributedStr;
+        CGSize size = [label sizeThatFits:CGSizeMake(MAXFLOAT, [self titleLabelHeight])];
+        if(idx == self.subViewControllers.count - 1){
+            totalWidth += size.width + [self topTitleViewRightLabelInset];
+        }else{
+            totalWidth += size.width + [self horizontalSpaceOfTitleLabel];
+        }
+    }];
+    [self updateTopTitleScrollViewContentSize];
+    CGRect bounds = self.titleBottomView.bounds;
+    CGPoint center = self.titleBottomView.center;
+    UILabel *currentLabel = [self.topTitleScrollView viewWithTag:self.selectedIndex + 100];
+    center.x = CGRectGetMidX(currentLabel.frame);
+    if([self shouldDynamicChangeTitleBottomViewWidth]){
+        bounds.size.width = currentLabel.bounds.size.width;
+    }else{
+        bounds.size.width = [self tmpTitleBottomViewWidth];
+    }
+    self.titleBottomView.bounds = bounds;
+    self.titleBottomView.center = center;
+    
+}
+
+- (void)reloadSubViewControllerTitle:(NSString *)title withIndex:(NSInteger)index {
+    if(index >= self.labels.count || title == nil) return;
+    __block CGFloat totalWidth = [self topTitleViewLeftLabelInset];
+    [self.subViewControllers enumerateObjectsUsingBlock:^(UIViewController * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        UILabel *label = self.labels[idx];
+        NSMutableAttributedString *attributedStr = [[NSMutableAttributedString alloc] initWithString:index == idx?title:obj.title];
+        [attributedStr addAttribute:NSBaselineOffsetAttributeName value:@([self titleLabelBaselineOffset]) range:NSMakeRange(0, attributedStr.length)];
+        if(idx == self.selectedIndex){
+            [attributedStr addAttribute:NSFontAttributeName value:[self selectedFontOfTitleLabel] range:NSMakeRange(0, attributedStr.length)];
+            [attributedStr addAttribute:NSForegroundColorAttributeName value:[self selectedColorOfTitleLabel] range:NSMakeRange(0, attributedStr.length)];
+        }else{
+            [attributedStr addAttribute:NSFontAttributeName value:[self normalFontOfTitleLabel] range:NSMakeRange(0, attributedStr.length)];
+            [attributedStr addAttribute:NSForegroundColorAttributeName value:[self normalColorOfTitleLabel] range:NSMakeRange(0, attributedStr.length)];
+        }
+        label.attributedText = attributedStr;
+        CGSize size = [label sizeThatFits:CGSizeMake(MAXFLOAT, [self titleLabelHeight])];
+        if(idx == self.subViewControllers.count - 1){
+            totalWidth += size.width + [self topTitleViewRightLabelInset];
+        }else{
+            totalWidth += size.width + [self horizontalSpaceOfTitleLabel];
+        }
+    }];
+    [self updateTopTitleScrollViewContentSize];
+    CGRect bounds = self.titleBottomView.bounds;
+    CGPoint center = self.titleBottomView.center;
+    UILabel *currentLabel = [self.topTitleScrollView viewWithTag:self.selectedIndex + 100];
+    center.x = CGRectGetMidX(currentLabel.frame);
+    if([self shouldDynamicChangeTitleBottomViewWidth]){
+        bounds.size.width = currentLabel.bounds.size.width;
+    }else{
+        bounds.size.width = [self tmpTitleBottomViewWidth];
+    }
+    self.titleBottomView.bounds = bounds;
+    self.titleBottomView.center = center;
 }
 
 #pragma mark - multiControllerHeaderView
