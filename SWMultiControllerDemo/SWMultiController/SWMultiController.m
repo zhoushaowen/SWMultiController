@@ -833,6 +833,9 @@
     __block CGFloat totalWidth = [self topTitleViewLeftLabelInset];
     [self.subViewControllers enumerateObjectsUsingBlock:^(UIViewController * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
         UILabel *label = self.labels[idx];
+        if(title && idx == index){
+            obj.title = title;
+        }
         NSMutableAttributedString *attributedStr = [[NSMutableAttributedString alloc] initWithString:index == idx?title:obj.title];
         [attributedStr addAttribute:NSBaselineOffsetAttributeName value:@([self titleLabelBaselineOffset]) range:NSMakeRange(0, attributedStr.length)];
         if(idx == self.selectedIndex){
