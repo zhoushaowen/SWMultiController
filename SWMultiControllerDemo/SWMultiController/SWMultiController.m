@@ -135,6 +135,10 @@
     return self;
 }
 
++ (Class)bgScrollViewClass {
+    return [UIScrollView class];
+}
+
 - (void)viewDidLoad {
     [super viewDidLoad];
     self.view.backgroundColor = [UIColor whiteColor];
