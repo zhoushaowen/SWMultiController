@@ -139,7 +139,7 @@
     [super viewDidLoad];
     self.view.backgroundColor = [UIColor whiteColor];
     self.scrollBgView = ({
-        UIScrollView *scroll = [[UIScrollView alloc] initWithFrame:CGRectMake(0, [self topTitleViewHeight], self.view.bounds.size.width, self.view.bounds.size.height - [self topTitleViewHeight])];
+        UIScrollView *scroll = [[[[self class] bgScrollViewClass] alloc] initWithFrame:CGRectMake(0, [self topTitleViewHeight], self.view.bounds.size.width, self.view.bounds.size.height - [self topTitleViewHeight])];
         if (@available(iOS 11.0, *)) {
             scroll.contentInsetAdjustmentBehavior = UIScrollViewContentInsetAdjustmentNever;
         } else {

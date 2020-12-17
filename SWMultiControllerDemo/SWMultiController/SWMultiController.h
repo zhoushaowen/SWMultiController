@@ -69,6 +69,9 @@ NS_ASSUME_NONNULL_BEGIN
  最底层的scrollView
  */
 @property (nonatomic,readonly,strong) UIScrollView *scrollBgView;
+/// 自定义scrollBgView的类型
++ (Class)bgScrollViewClass;
+
 @property (nonatomic,readonly,copy) NSArray<UILabel *> *labels;
 @property (nonatomic,readonly) UIImageView *titleBottomView;
 /**
