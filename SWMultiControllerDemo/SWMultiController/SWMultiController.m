@@ -41,6 +41,7 @@
 @property (nonatomic,strong) RACDisposable *multiHeaderViewFrameDisposable;
 @property (nonatomic) BOOL shouldSpaceAround;
 @property (nonatomic) CGFloat space;
+@property (nonatomic,strong) UIView *multiControllerHeaderContentView;
 
 - (UIScrollView *)sw_getAssociatedScrollViewWithSubViewController:(UIViewController *)subViewController;
 
@@ -591,7 +592,7 @@
 #pragma mark - Private
 - (UIFont *)getFontWithBeginFont:(UIFont *)beginFont endFont:(UIFont *)endFont percent:(CGFloat)percent {
     CGFloat fontOffset = [endFont pointSize] - [beginFont pointSize];
-    return [UIFont systemFontOfSize:beginFont.pointSize + percent * fontOffset];
+    return [UIFont fontWithDescriptor:percent == 0?beginFont.fontDescriptor:endFont.fontDescriptor size:beginFont.pointSize + percent * fontOffset];
 }
 
 - (UIColor *)getColorWithBeginColor:(UIColor *)beginColor endColor:(UIColor *)endColor percent:(CGFloat)percent {
@@ -873,10 +874,17 @@
 
 #pragma mark - multiControllerHeaderView
 - (void)setMultiControllerHeaderView:(UIView *)multiControllerHeaderView {
+    if(_multiControllerHeaderView == multiControllerHeaderView) return;
     if(_multiControllerHeaderView){
         [_multiControllerHeaderView removeFromSuperview];
     }
     [self.multiHeaderViewFrameDisposable dispose];
+    if(multiControllerHeaderView){
+        [self.view addSubview:self.multiControllerHeaderContentView];
+        [self.multiControllerHeaderContentView addSubview:multiControllerHeaderView];
+    }else{
+        [self.multiControllerHeaderContentView removeFromSuperview];
+    }
     @weakify(self)
     @weakify(multiControllerHeaderView)
     self.multiHeaderViewFrameDisposable = [multiControllerHeaderView rac_observeKeyPath:@"frame" options:NSKeyValueObservingOptionNew observer:self block:^(id value, NSDictionary *change, BOOL causedByDealloc, BOOL affectedOnlyLastComponent) {
@@ -886,14 +894,15 @@
         UIViewController *currentVC = self.subViewControllers[self.selectedIndex];
         UIScrollView *scrollView = [self sw_getAssociatedScrollViewWithSubViewController:currentVC];
         if(scrollView){
-            UIView *headerView = [self.headerViews objectForKey:currentVC];
-            if(headerView){
+//            UIView *headerView = [self.headerViews objectForKey:currentVC];
+//            if(headerView){
                 CGFloat height = multiControllerHeaderView.bounds.size.height + [self topTitleViewHeight];
                 [scrollView setContentInset:UIEdgeInsetsMake(height, 0, 0, 0)];
-                headerView.frame = CGRectMake(0, -height, self.view.bounds.size.width, height);
+                self.multiControllerHeaderContentView.frame = CGRectMake(0, 0, self.view.bounds.size.width, height);
                 scrollView.mj_header.ignoredScrollViewContentInsetTop = height;
-            }
+//            }
         }
+
     }];
     _multiControllerHeaderView = multiControllerHeaderView;
     CGRect headerViewFrame = _multiControllerHeaderView.frame;
@@ -903,6 +912,13 @@
         headerViewFrame.size.height = 200;
     }
     _multiControllerHeaderView.frame = headerViewFrame;
+}
+
+- (UIView *)multiControllerHeaderContentView {
+    if(!_multiControllerHeaderView){
+        _multiControllerHeaderContentView = [UIView new];
+    }
+    return _multiControllerHeaderContentView;
 }
 
 - (NSMapTable *)headerViews {
