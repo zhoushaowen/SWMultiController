@@ -8,10 +8,10 @@
 
 #import "SWMultiController.h"
 #import <objc/runtime.h>
-#import <NSObject+RACKVOWrapper.h>
-#import <RACEXTScope.h>
-#import <ReactiveObjC.h>
-#import <MJRefresh.h>
+#import <ReactiveObjC/NSObject+RACKVOWrapper.h>
+//#import <RACEXTScope.h>
+#import <ReactiveObjC/ReactiveObjC.h>
+#import <MJRefresh/MJRefresh.h>
 
 @interface SWMultiControllerObserver : NSObject
 
