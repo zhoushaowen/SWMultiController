@@ -65,6 +65,9 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (nonatomic,strong) void(^scrollBgViewDidScrollBlock)(UIScrollView *scrollBgView);
 
+/// 是否允许点击顶部的Label进行页面切换
+@property (nonatomic,strong) BOOL(^shouldEnableTapTopTitleLabel)(NSInteger index);
+
 /**
  最底层的scrollView
  */

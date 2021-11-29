@@ -688,6 +688,11 @@
 
 - (void)handleTapGesture:(UITapGestureRecognizer *)gesture {
     NSInteger index = gesture.view.tag - 100;
+    BOOL enable = YES;
+    if(self.shouldEnableTapTopTitleLabel){
+        enable = self.shouldEnableTapTopTitleLabel(index);
+    }
+    if(!enable) return;
     [self selectedIndex:index];
     if(self.didTapTitleLabelBlock){
         self.didTapTitleLabelBlock((UILabel *)gesture.view, index);
